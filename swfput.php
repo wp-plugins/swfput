@@ -106,8 +106,8 @@ endif;
  * to a $var; 5.2 *cannot* call class methods, static or
  * not, through any alias
  */
-if ( ! function_exists( 'evh_php52_htmlent' ) ) :
-function evh_php52_htmlent ($text, $cset = 'UTF-8' )
+if ( ! function_exists( 'swfput_php52_htmlent' ) ) :
+function swfput_php52_htmlent ($text, $cset = 'UTF-8' )
 {
 	return htmlentities($text, ENT_QUOTES, $cset);
 }
@@ -2515,7 +2515,7 @@ class SWF_put_widget_evh extends WP_Widget {
 		$wt = 'wptexturize';  // display with char translations
 		// still being 5.2 compatible; anon funcs appeared in 5.3
 		//$ht = function($v) { return htmlentities($v, ENT_QUOTES, 'UTF-8'); };
-		$ht = 'evh_php52_htmlent'; // just escape without char translations
+		$ht = 'swfput_php52_htmlent'; // just escape without char translations
 		// NOTE on encoding: do *not* use JS::unescape()!
 		// decodeURIComponent() should use the page charset (which
 		// still leaves room for error; this code assumes UTF-8 presently)
