@@ -219,6 +219,10 @@ Maybe later.
 	add_(action|filter) calls, according to tag used, checked against
 	WP source (whether do_action() or apply_filters() is invoked
 	for the tag in question).
+* Changed JS unescape() to decodeURIComponent().
+* Removed compiled README.{tty,tt8} from distribution.
+* Changed 'wptexturize' to 'htmlentities' for paths and things that
+	should not be pretty-pretty'd.
 
 = 1.0.1 =
 * Maintenance.
@@ -236,11 +240,15 @@ Maybe later.
 == Upgrade Notice ==
 
 = 1.0.2 =
-Maintenance.
+BUG FIX: URLs with non-8-bit characters would be corrupted in form
+	fields, causing not-found errors in the player: changed
+	JS unescape() to decodeURIComponent(). (Feedback on non-UTF-8
+	charsets would be welcome!)
 
 = 1.0.1 =
 This revision has one important change: a misfeature that would
-simulate an initial image (if one was not set) by pausing
-at a random point within first few seconds of the video, but
-causing an unsolicited download of the medium in order to do so,
-has been disabled.
+	simulate an initial image (if one was not set) by pausing
+	at a random point within first few seconds of the video, but
+	causing an unsolicited download of the medium in order to do so,
+	has been disabled.
+	
