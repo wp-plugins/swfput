@@ -3,7 +3,7 @@
 Plugin Name: SWFPut
 Plugin URI: http://agalena.nfshost.com/b1/?page_id=46
 Description: Add Shockwave Flash video to WordPress posts and widgets, from arbitrary URI's or media library ID's or files in your media upload directory tree (even if not added by WordPress and assigned an ID).
-Version: 1.0.2
+Version: 1.0.3
 Author: Ed Hynan
 Author URI: http://agalena.nfshost.com/b1/
 License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
@@ -42,7 +42,8 @@ License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
 // each class must define static method id_token() which returns
 // the correct int, to help avoid name clashes
 if ( ! function_exists( 'swfput_paranoid_require_class' ) ) :
-function swfput_paranoid_require_class ($cl, $rfunc = 'require_once') {
+function swfput_paranoid_require_class ($cl, $rfunc = 'require_once')
+{
 	$id = 0xED00AA33;
 	$meth = 'id_token';
 	if ( ! class_exists($cl) ) {
@@ -107,8 +108,23 @@ endif;
  * not, through any alias
  */
 if ( ! function_exists( 'swfput_php52_htmlent' ) ) :
-function swfput_php52_htmlent ($text, $cset = 'UTF-8' )
+function swfput_php52_htmlent ($text, $cset = null)
 {
+	// try to use get_option('blog_charset') only once;
+	// it's not cheap enough even with WP's cache for
+	// the number of times this might be called
+	global $swfput_blog_charset;
+	if ( ! isset($swfput_blog_charset) ) {
+		$swfput_blog_charset = get_option('blog_charset');
+		if ( ! $swfput_blog_charset ) {
+			$swfput_blog_charset = 'UTF-8';
+		}
+	}
+
+	if ( $cset === null ) {
+		$cset = $swfput_blog_charset;
+	}
+
 	return htmlentities($text, ENT_QUOTES, $cset);
 }
 endif;
@@ -197,7 +213,7 @@ class SWF_put_evh {
 	protected $swfputphp;
 	// swfput program css path
 	protected $swfputcss;
-	// swfput program css path
+	// swfput program default video path
 	protected $swfputvid;
 
 	// swfput js subdirectory
@@ -238,6 +254,25 @@ class SWF_put_evh {
 			$this->init_opts();
 			return;
 		}
+		
+		// Do .mo load, in case translations exist;
+		// must use 'default' domain if invoking
+		// __()/translate() with one arg, because
+		// the second arg (domain) defaults to 'default'.
+		// Second arg to load*() function is deprecated.
+		// Third arg is path relative to WP_PLUGIN_DIR,
+		// and will be WP_PLUGIN_DIR alone if arg 3 is false.
+		// We don't want to install .mo in WP_PLUGIN_DIR;
+		// so, pass this plugin's install dir and a .mo
+		// subdir. With this set of args, .mo files will
+		// need to have paths like:
+		//  <WP_PLUGIN_DIR>/plugin_dirname/subdir/default-en_US.mo
+		// where "en_US" is the filtered return from
+		// get_locale(), "default" is the domain arg
+		// (arg 1). This plugin will use subir "locale"
+		// to hold .mo files, if any.
+		$t = basename(trim(self::mk_plugindir(), '/')) . '/locale';
+		load_plugin_textdomain('default', false, $t);
 		
 		$this->init_settings_page();
 
@@ -1604,7 +1639,22 @@ class SWF_put_evh {
 	}
 	
 	// 'html-ize' a text string
-	public static function ht($text) {
+	public static function ht($text, $cset = null) {
+		// try to use get_option('blog_charset') only once;
+		// it's not cheap enough even with WP's cache for
+		// the number of times this might be called
+		global $swfput_blog_charset;
+		if ( ! isset($swfput_blog_charset) ) {
+			$swfput_blog_charset = get_option('blog_charset');
+			if ( ! $swfput_blog_charset ) {
+				$swfput_blog_charset = 'UTF-8';
+			}
+		}
+	
+		if ( $cset === null ) {
+			$cset = $swfput_blog_charset;
+		}
+
 		return htmlentities($text, ENT_QUOTES, 'UTF-8');
 	}
 	
@@ -1667,7 +1717,6 @@ class SWF_put_evh {
 	                        continue;
 	                }
 	                if ( is_file($t) && preg_match($pat, $e) ) {
-	                        //$ao[] = array($e, $pr);
 	                        $ao[$dir][] = $e;
 	                }
 	        }
