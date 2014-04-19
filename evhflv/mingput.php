@@ -21,7 +21,7 @@
 
 /*
 * Description: build SWF video app with PHP/Ming, put on stdout
-* Version: 1.0.8
+* Version: 2.0
 * Author: Ed Hynan
 * License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
 */
@@ -34,9 +34,9 @@
 
 
 // set this const to false on release
-// (originally had used 'const', not realizing it is new to php 5.3)
+// 'const' is new to php 5.3 except within class{}; must support 5.2
 //const develtime = true;
-define( 'develtime', true );
+define('develtime', false);
 $i_release = develtime ? 0 : 1;
 
 if ( develtime ) {

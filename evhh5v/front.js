@@ -1,108 +1,51 @@
-//
-//      This program is free software; you can redistribute it and/or modify
-//      it under the terms of the GNU General Public License as published by
-//      the Free Software Foundation; either version 2 of the License, or
-//      (at your option) any later version.
-//      
-//      This program is distributed in the hope that it will be useful,
-//      but WITHOUT ANY WARRANTY; without even the implied warranty of
-//      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//      GNU General Public License for more details.
-//      
-//      You should have received a copy of the GNU General Public License
-//      along with this program; if not, write to the Free Software
-//      Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-//      MA 02110-1301, USA.
-//
+/*
+ *      editor_plugin3x.js
+ *      
+ *      Copyright 2014 Ed Hynan <edhynan@gmail.com>
+ *      
+ *      This program is free software; you can redistribute it and/or modify
+ *      it under the terms of the GNU General Public License as published by
+ *      the Free Software Foundation; specifically version 3 of the License.
+ *      
+ *      This program is distributed in the hope that it will be useful,
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *      GNU General Public License for more details.
+ *      
+ *      You should have received a copy of the GNU General Public License
+ *      along with this program; if not, write to the Free Software
+ *      Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ *      MA 02110-1301, USA.
+ */
 
 /**
- * For Wordpress public facing front end: optional JS presentation
- * of the flash player and alternate <video> and <img> -- meant
- * particularly for mobile device clients
+ * HTML5 <video> controller, providing a control bar and associated
+ * graphical elements (wait spinner, initial centered play icon),
+ * including the ability to paint the video on a <canvas> element
+ * thus allowing asjustment for user-set aspect ratio (used also
+ * as a workaroung for browser bugs).
+ * 
+ * Also included here is re-sizer code, which is works with parent
+ * <div> and so can work with other contents; primarily flash
+ * plugin video player of the SWFPut WordPress plugin for/with
+ * which this was developed.
  * 
  * Added evhh5v v. 1.0.7, 2014/01/26
  * (C) Ed Hynan 2014
  */
 
-// borrowed from:
-// http://robertnyman.com/2006/04/24/get-the-rendered-style-of-an-element/
-// get 'computed' style of element
-var evhh5v_getstyle = function (el, sty) {
-	var v = 0;
-	if ( document.defaultView && document.defaultView.getComputedStyle ) {
-		v = document.defaultView.getComputedStyle(el, "").getPropertyValue(sty);
-	} else if ( el.currentStyle ) {
-		sty = sty.replace(/\-(\w)/g, function (m1, p1) {
-			return p1.toUpperCase();
-		});
-		v = el.currentStyle[sty];
-	}
-	return v;
-};
 
 
-// preferably do not add query string to svg url where
-// it is known to be not needed (actually, I know only
-// that MSIE *does* need it, but it is safer to be certain
-// it is not needed) -- this function will test only once
-// and return true if we are not confident the user agent
-// does *not* need a query string for the svg parameters
-function evhh5v_need_svg_query() {
-	if ( document.evhh5v_need_svg_query_bool !== undefined ) {
-		return document.evhh5v_need_svg_query_bool;
-	}
-	document.evhh5v_need_svg_query_bool = ( !
-	/(FireFox|WebKit|KHTML|Chrom[ie]|Safari|OPR\/|Opera)/i.test(navigator["userAgent"])
-	) == false;
-	
-	return document.evhh5v_need_svg_query_bool;
-};
-
-// is the browser, or 'user agent', mobile?
-// [lifted from WordPress php]
-function evhh5v_ua_is_mobile() {
-	if ( document.evhh5v_ua_is_mobile_bool !== undefined ) {
-		return document.evhh5v_ua_is_mobile_bool;
-	}
-
-	document.evhh5v_ua_is_mobile_bool = false;
-	var ua = navigator["userAgent"];
-	
-	if (   ua.indexOf('Mobile') >= 0 // many mobile devices (all iPhone, iPad, etc.)
-		|| ua.indexOf('Android') >= 0
-		|| ua.indexOf('Silk/') >= 0
-		|| ua.indexOf('Kindle') >= 0
-		|| ua.indexOf('BlackBerry') >= 0
-		|| ua.indexOf('Opera Mini') >= 0
-		|| ua.indexOf('Opera Mobi') >= 0 ) {
-		document.evhh5v_ua_is_mobile_bool = true;
-	}
-
-	return document.evhh5v_ua_is_mobile_bool;
-};
-
-// Unfortunately some browser brokenness must be handled under
-// some circumstances; e.g., a not-current Opera under FreeBSD
-// tested fine with all this until it was integrated with the
-// the SWFPut WordPress plugin, in which context the outer <div>
-// was not adjusting its height properly (seemingly confused that
-// the first fallback element under the flash <object> was a <div>
-// because in earlier versions of the plugin there was no problem:
-// the div is the most obvious difference).
-// So, corrective measures may be added here as needed.
-function evhh5v_fixup_elements(parms) {
-	var ip = parms["iparm"];
-
-	if ( /Opera/i.test(navigator["userAgent"]) ) {
-		var t = document.getElementById(ip["auxdiv"]);
-		if ( t && t.parentNode && t.parentNode.nodeName.toLowerCase() === "object" ) {
-			var p = t.parentNode;
-			var d = p.parentNode;
-			p.removeChild(t);
-			d.replaceChild(t, p);
-		}
-	}
-}
+/**********************************************************************\
+ *                                                                    *
+ * Procedure to create the <object> and <param> elements that support *
+ * the video controller and control bar, serving two related goals:   *
+ * 1. the HTML5 video should remain useful where JavaScript is disa-  *
+ *    bled, in which case the browser-native interface should work    *
+ * 2. eliminates much of the page markup that would be necessary, and *
+ *    and useless (with whatever side-effects) without JavaScript.    *
+ *                                                                    *
+\**********************************************************************/
 
 // build and add to DOM the elements needed for the svg control bar
 // of the html5 video player; arg is a map[*] of map,
@@ -284,6 +227,22 @@ function evhh5v_controlbar_elements(parms, fixups) {
 		evhh5v_fixup_elements(parms);
 	}
 };
+
+
+/**********************************************************************\
+ *                                                                    *
+ * evhh5v_sizer, and support code: works based on browser changes to  *
+ * and enclosing <div>, as happens with 'responsive' CSS and elements *
+ *                                                                    *
+ * cannot rely on the browser to resize video along with the other    *
+ * elements -- the flash plugin in particular is not resized without  *
+ * this, and the HTML5 video controller is designed to work with this *
+ * rather that hook size events (i.e. it defines width & height       *
+ * getter/setter properties that this uses like any property).        *
+ *                                                                    *
+ * this is not tied th the video controller                           *
+ *                                                                    *
+\**********************************************************************/
 
 // (ugly hack to get resize event: save _adj instances, see below)
 var evhh5v_sizer_instances = [];
@@ -501,7 +460,15 @@ evhh5v_sizer.prototype = {
 	}
 };
 
-// helper to use fullscreen where available
+
+/**********************************************************************\
+ *                                                                    *
+ * Support object for FullScreen mode -- this mode is not finalized   *
+ * so browser prefixed symbols are tested and used -- proves reliable *
+ * in the major browsers                                              *
+ *                                                                    *
+\**********************************************************************/
+
 //
 // map of symbols derived from code with copyright, MIT license,
 // and URL as follows (in original C-style comment):
@@ -529,12 +496,12 @@ var evhh5v_fullscreen = {
 	// public methods corresponding to fullscreen api:
 	// these throw on error
 	//
-	// invoke ~= requestFullscreen; takes element or uses document
+	// ~= requestFullscreen; takes element or uses document
 	request : function(elm) {
 		var el = elm === undefined ? document : elm;
 		el[this.map_val("request")]();
 	},
-	// invoke ~= exitFullscreen
+	// ~= exitFullscreen
 	exit : function() {
 		document[this.map_val("exit")]();
 	},
@@ -665,10 +632,11 @@ function evhh5v_fullscreen_ok() {
 }
 
 
-/**
- * svg-based control bar for HTML5 video
- */
-
+/**********************************************************************\
+ *                                                                    *
+ * SVG-based control bar construction and maintencance object         *
+ *                                                                    *
+\**********************************************************************/
 
 // build svg control bar for video object
 // this class is matched to svg in ctl(bar|but|vol).svg
@@ -714,6 +682,8 @@ var evhh5v_controlbar = function(params) {
 	this.mk();
 };
 evhh5v_controlbar.prototype = {
+
+// helper for placing properties on the prototype; k must be a string
 proto_set : function(k, v) {
 	evhh5v_controlbar.prototype[k] = v;
 },
@@ -760,11 +730,12 @@ treqbase : function(height) {
 	return height * this.treq_r_bh;
 },
 // angle unit conversion
+pi_hemi : Math.PI / 180.0,
 deg2rad : function(a) {
-	return a * Math.PI / 180.0;
+	return a * this.pi_hemi;
 },
 rad2deg : function(a) {
-	return a / (Math.PI / 180.0);
+	return a / this.pi_hemi;
 },
 // because a browser's Math might not have hypot(); this.ctor may
 // change this if hypot() is found.
@@ -1599,12 +1570,20 @@ mk_volctl : function(parentobj, doc) {
 	var hdlmd = function(e) {
 		//var t = this;
 		that.volctl_mousedown = 1;
+		// (set|rel)Capture works beautifully in FFox, undef'd in webkit
+		if ( e.target.setCapture !== undefined ) {
+			e.target.setCapture();
+		}
 		return false;
 	};
 	var hdlmu = function(e) {
 		if ( that.volctl_mousedown ) {
 			var t = this;
 			that.hdl_volctl(e, t);
+		}
+		// (set|rel)Capture works beautifully in FFox, undef'd in webkit
+		if ( e.target.releaseCapture !== undefined ) {
+			e.target.releaseCapture();
 		}
 		that.volctl_mousedown = 0;
 		return false;
@@ -1763,8 +1742,6 @@ var_init : function() {
 
 // for disbled button icons: refers to filter in svg <defs> block
 disabfilter : 'url(#blur_dis)',
-// x position offset factors for buttons
-xfacts : [0.5, 1.5, 2, 1.5, 2],
 
 // event handler for play progress bar, which is used to seek
 prog_pl_click : function(e) {
@@ -1792,7 +1769,8 @@ init_inibut : function() {
 		return true;
 	}
 	var k = this.parms["parentdiv"];
-	if ( evhh5v_ctlbutmap[k] === undefined || evhh5v_ctlbutmap[k]["loaded"] !== true ) {
+	if ( evhh5v_ctlbutmap[k] === undefined
+		|| evhh5v_ctlbutmap[k]["loaded"] !== true ) {
 		return false;
 	}
 	this.b_parms = evhh5v_ctlbutmap[k];
@@ -1834,6 +1812,9 @@ is_mobile : function() {
 	return evhh5v_ua_is_mobile();
 },
 
+// x position offset factors for buttons
+xfacts : [0.5, 1.5, 2, 1.5, 2],
+
 mk : function() {
 	var mobi = this.is_mobile();
 	var mnot = ! mobi;
@@ -1848,6 +1829,10 @@ mk : function() {
 	if ( mobi ) {
 		this.xfacts = [0.25, 1.75, 1.75, 1.75, 1.75];
 	}
+	
+	// store for button default and current x.position and state
+	this.button_data = {};
+	var dat = this.button_data;
 
 	svg.setAttribute("viewBox", this.viewbox);
 	this.gall = doc.getElementById("g_all_g");
@@ -1858,20 +1843,55 @@ mk : function() {
 
 	// buttons
 	var gbn = doc.getElementById("g_button_1");
-	this.button_play = this.mk_playpause(gbn, ofs += this.xfacts[0]);
-	this.button_stop = this.mk_stop(gbn, ofs += this.xfacts[1]);
+	dat["show"] = gbn;
+	dat["hide"] = doc.getElementById("g_button_2");
+	dat["hide"].setAttribute("visibility", "hidden");
+
+	dat["play"] = {}; dat["play"].defx = ofs += this.xfacts[0];
+	this.button_play = this.mk_playpause(gbn, dat["play"].defx);
+	dat["play"].obj = this.button_play;
+
+	dat["stop"] = {}; dat["stop"].defx = ofs += this.xfacts[1];
+	this.button_stop = this.mk_stop(gbn, dat["stop"].defx);
+	dat["stop"].obj = this.button_stop;
 	this.stopbtn_disab();
-	if ( mnot ) { // neither scale nor fullscreen for mobile
-		this.button_doscale = this.mk_doscale(gbn, ofs += this.xfacts[2]);
+
+	if ( true || mnot ) { // neither scale nor fullscreen for mobile
+		dat["doscale"] = {}; dat["doscale"].defx = ofs += this.xfacts[2];
+		this.button_doscale = this.mk_doscale(gbn, dat["doscale"].defx);
+		dat["doscale"].obj = this.button_doscale;
 		this.show_scalein();
 		this.blur_doscale();
-		this.button_fullscreen = this.mk_fullscreen(gbn, ofs += this.xfacts[3]);
+
+		dat["fullscreen"] = {}; dat["fullscreen"].defx = ofs += this.xfacts[3];
+		this.button_fullscreen = this.mk_fullscreen(gbn, dat["fullscreen"].defx);
+		dat["fullscreen"].obj = this.button_fullscreen;
 		this.show_fullscreenout();
 		this.blur_fullscreen();
 	} else {
 		this.button_doscale = this.button_fullscreen = false;
 	}
-	this.button_volume = this.mk_volume(gbn, ofs += this.xfacts[4]);
+	dat["volume"] = {}; dat["volume"].defx = ofs += this.xfacts[4];
+	this.button_volume = this.mk_volume(gbn, dat["volume"].defx);
+	dat["volume"].obj = this.button_volume;
+
+	for ( var k in dat ) {
+		var cur = dat[k];
+		if ( cur.defx === undefined ) {
+			continue;
+		}
+
+		var obj = cur.obj;
+		cur.defx = obj.getAttribute("x");
+
+		obj.x.baseVal.convertToSpecifiedUnits(
+			obj.x.baseVal.SVG_LENGTHTYPE_PX);
+		cur.defx_px = obj.x.baseVal.valueInSpecifiedUnits;
+		obj.width.baseVal.convertToSpecifiedUnits(
+			obj.width.baseVal.SVG_LENGTHTYPE_PX);
+		cur.defwidth_px = obj.width.baseVal.valueInSpecifiedUnits;
+
+	}
 
 	// progress bars
 	var gpl = doc.getElementById("prog_seek");
@@ -1891,6 +1911,48 @@ mk : function() {
 	// . . . public methods
 	set_bar_visibility : function(visi) {
 		this.svg.setAttribute("visibility", visi);
+	},
+
+	// handle narrow width: arg is boolean
+	set_narrow : function(narrow) {
+		var dat = this.button_data;
+		
+		if ( dat["doscale"] == undefined || dat["fullscreen"] == undefined ) {
+			return;
+		}
+
+		if ( dat["doscale"].hidden && narrow ) {
+			return;
+		}
+		if ( ! dat["doscale"].hidden && ! narrow ) {
+			return;
+		}
+
+		var gs = dat["show"], gh = dat["hide"];
+
+		if ( narrow ) {
+			var x = dat["doscale"].obj.getAttribute("x");
+
+			gs.removeChild(dat["doscale"].obj);
+			gs.removeChild(dat["fullscreen"].obj);
+
+			//gh.appendChild(dat["doscale"].obj);
+			//gh.appendChild(dat["fullscreen"].obj);
+
+			dat["doscale"].hidden = true;
+			dat["volume"].obj.setAttribute("x", x);
+
+			return;
+		}
+
+		dat["doscale"].hidden = false;
+		dat["volume"].obj.setAttribute("x", dat["volume"].defx);
+
+		//gh.removeChild(dat["doscale"].obj);
+		//gh.removeChild(dat["fullscreen"].obj);
+
+		gs.insertBefore(dat["fullscreen"].obj, dat["volume"].obj);
+		gs.insertBefore(dat["doscale"].obj, dat["fullscreen"].obj);
 	},
 
 	// show wait spinner
@@ -2218,6 +2280,17 @@ mk : function() {
 			var t = this.rszo[i].id == "bgrect" ? nw : pnw;
 			this.rszo[i].setAttribute("width", t);
 		}
+
+		var obj = this.button_data["volume"].obj;
+		obj.width.baseVal.convertToSpecifiedUnits(
+			obj.width.baseVal.SVG_LENGTHTYPE_PX);
+		var mxw = obj.width.baseVal.valueInSpecifiedUnits;
+		var mxx = this.button_data["volume"].defx_px;
+		var max = mxx + mxw;
+		// right pad == leftmost button.x
+		max += this.button_data["play"].defx_px;
+
+		this.set_narrow(w < max);
 	},
 
 	show_dl_active : function() {
@@ -2327,6 +2400,8 @@ mk : function() {
 	endmember : this
 };
 
+// helpers to be called from svg browsing context JS, because
+// 'onfoo' will execute in that context
 function evhh5v_setvisi(obj, visi) {
 	if ( obj ) {
 		obj.setAttribute("visibility", visi);
@@ -2340,6 +2415,14 @@ function evhh5v_svg_click(obj, parms) {
 	}
 	bar.evhh5v_controller.button_click(obj);
 };
+
+
+/**********************************************************************\
+ *                                                                    *
+ * The HTML5 video controller object -- scaling, fullscreen, aspect,  *
+ * event handling, control bar control (and browser bugs)             *
+ *                                                                    *
+\**********************************************************************/
 
 var evhh5v_controller = function(vid, ctlbar, pad) {
 	vid.removeAttribute("controls"); // should be done, but be sure
@@ -2357,15 +2440,24 @@ var evhh5v_controller = function(vid, ctlbar, pad) {
 	this.tickinterval_divisor = 1000 / this.tickinterval;
 	this.ptrtickmax = this.tickinterval_divisor * this.ptrinterval;
 	this.ptrtick = 0;
+
 	this.doshowbartime = false;
-	if ( this.params['hidebar'] && this.params['hidebar'] == 'true' ) {
+	if ( this.params['hidebar'] !== undefined
+		&& this.params['hidebar'] == 'true' ) {
 		this.doshowbartime = true;
 	}
-	this.doshowbar     = true;
-	if ( this.params['disablebar'] && this.params['disablebar'] == 'true' ) {
+	this.doshowbar = true;
+	if ( this.params['disablebar'] !== undefined
+		&& this.params['disablebar'] == 'true' ) {
 		this.disablebar = true;
 		this.doshowbar = false;
 		this.doshowbartime = false;
+	}
+
+	this.allowfull = true;
+	if ( this.params['allowfull'] !== undefined
+		&& this.params['allowfull'] == 'false' ) {
+		this.allowfull = false;
 	}
 
 	this.barpadding = 2;
@@ -2417,6 +2509,28 @@ evhh5v_controller.prototype = {
 	mouse_hide_class : "evhh5v_mouseptr_hidden",
 	mouse_show_class : "evhh5v_mouseptr_normal",
 
+	// Bug that appeared in Chrom(e|ium)/33.?
+	// Chrom(e|ium)/33.* has broken display re-draw when
+	// parent div of wait indicator is moved into place.
+	// Earlier Chrom* were fine (in this regard). Note that
+	// I mean the Chrom* component that is used in Opera too,
+	// the exact same bug is seen there with latest version
+	// and it too reports /33.* in its UA string.
+	// I spent hours looking for a workaround but found
+	// nothing, except to disable the spinner.
+	// Update: bug is only exacerbated by showing the wait
+	// spinner, not triggered -- even w/o spinner, the poster
+	// intermittently appears on seek. Apparently, having
+	// to composite the spinner too really gets it confused.
+	// Update: bug evolves with Chromium/34 beta, and with
+	// Chromium/35 the poster is drawn on seek completely and
+	// consistently, and looks very much like an intentional
+	// feature, so let 35+ show the spinner and revisit this
+	// if necessary
+	chrome_draw_bug :
+		/Chrom(e|ium)\/3[3-4]\./i.test(navigator["userAgent"]),
+		// /Chrom(e|ium)\/([4-9][0-9]|3[3-9])\./i.test(navigator["userAgent"]),
+
 	// hack: this member should have been called 'params' rather
 	// than 'ctlbar'; replacement will be arduous, so use this
 	// getter as a "params" alias until the member name is changed
@@ -2437,7 +2551,7 @@ evhh5v_controller.prototype = {
 			this.autoplay = false;
 		}
 		
-		if ( evhh5v_fullscreen_ok() ) {
+		if ( this.allowfull && evhh5v_fullscreen_ok() ) {
 			this.bar.unblur_fullscreen();
 		} else {
 			this.bar.blur_fullscreen();
@@ -2459,9 +2573,13 @@ evhh5v_controller.prototype = {
 		var that = this;
 
 		this.bar.controller_handle_volume = function(pct) {
+			// delay pointer/bar hiding for volume interaction
+			that.ptrtick = 0;
+			// paranoia check
 			if ( ! isFinite(pct) ) {
 				return;
 			}
+			//assign volume value
 			var v = that._vid;
 			if ( v.volume !== undefined ) {
 				pct = Math.max(0, Math.min(1, pct));
@@ -2860,6 +2978,7 @@ evhh5v_controller.prototype = {
 
 		this.setup_aspect_factors(); this.put_canvas_poster();
 		if ( this.ctlbar.evhh5v_controlbar ) {
+console.log('CALL resize_bar: w == ' + v + ', h == ' + this.barheight);
 			this.ctlbar.evhh5v_controlbar.resize_bar(v, this.barheight);
 			this.play_progress_update();
 		}
@@ -2947,6 +3066,10 @@ evhh5v_controller.prototype = {
 			t = ename.slice(0);
 		}
 		for ( var i = 0; i < t.length; i++ ) {
+			this.add_evt(t[i], callbk, bubool);
+			/* This big switch was from early development; later
+			 * just a reference for events. For now, leave it and
+			 * let minimizer strip it out.
 			switch ( t[i] ) {
 				// video
 				case "loadstart":
@@ -2990,6 +3113,7 @@ evhh5v_controller.prototype = {
 				default:
 					console.log('evhh5v_controller: unexpected event added: "' + ename + '"');
 			}
+			*/
 		}
 	},
 	// events
@@ -3021,7 +3145,7 @@ evhh5v_controller.prototype = {
 		// different between FFox and Chromium.
 		//
 		// 25.03.2014 I have the behavior I want in FFox (28.0), in at
-		// least the current testing; but, Chromium is not delivering
+		// least the current testing; but, Chromium/33. is not delivering
 		// "waiting" even when it has insufficient data and display
 		// is stalled (this is w/ 76.8kbs rate limit). This will
 		// have to do, there is no more time now.
@@ -3043,15 +3167,15 @@ evhh5v_controller.prototype = {
 		}
 		this.addEventListener(wait_ev, function(e) {
 			this.show_wait();
-			console.log("WAIT SPINNER START: " + e.type);
+			//console.log("WAIT SPINNER START: " + e.type);
 		}, false);
 		this.addEventListener(["seeked", "canplaythrough", "playing", "loadeddata", "ended"], function(e) {
 			this.hide_wait();
-			console.log("WAIT SPINNER STOP: " + e.type);
+			//console.log("WAIT SPINNER STOP: " + e.type);
 		}, false);
 
 		this.addEventListener("play", function(e) {
-			console.log("Event: " + e.type);
+			//console.log("Event: " + e.type);
 			this.get_canvas_context();
 			this.canvas_clear();
 			this.has_been_played = true;
@@ -3118,6 +3242,8 @@ evhh5v_controller.prototype = {
 				// if this.setup_aspect_factors() has correct data
 				// (*aspect and such will likely be invalid after a
 				// src change; as yet this code does not support such).
+				// Update: Chromium 24 beta and 35 unstable are
+				// generating "resize" -- why?
 				console.log("Got RESIZE: w == " + 
 					this._vid.videoWidth + ", h == " +
 					this._vid.videoHeight);
@@ -3147,7 +3273,7 @@ evhh5v_controller.prototype = {
 				// probably in error. IAC, it is proving to be not only
 				// non-fatal, but unnoticeable in playback and further
 				// consequence; so, just return
-				console.log("DBG event error : video.error === " + this._vid.error);
+				//console.log("DBG event error : video.error === " + this._vid.error);
 				return;
 			} else if ( e.type !== "ended" ) {
 				var t = this._vid.error;
@@ -3155,10 +3281,10 @@ evhh5v_controller.prototype = {
 				// determined, so this this is guesswork subject
 				// to revision
 				if ( ! t ) {
-					console.log("DBG error||abort: .error === "+t);
+					//console.log("DBG error||abort: .error === "+t);
 					return;
 				}
-				console.log("DBG error||abort: .error.code === "+t.code);
+				//console.log("DBG error||abort: .error.code === "+t.code);
 				// use try in case MediaError constants are undefined
 				try {
 					switch ( t.code ) {
@@ -3249,7 +3375,6 @@ evhh5v_controller.prototype = {
 					var co;
 					if ( te ) {
 						e.preventDefault();
-						//evhh5v_do_dbg_obj(e.changedTouches[0]);
 						co = this.mouse_coords(e.changedTouches[0]);
 					} else {
 						co = this.mouse_coords(e);
@@ -3312,7 +3437,9 @@ evhh5v_controller.prototype = {
 						this.stop();
 					} else if ( this.curkey == 70 || this.curkey == 102 ) {
 						// F,f
-						this.fullscreen();
+						if ( this.allowfull ) {
+							this.fullscreen();
+						}
 					} else if ( this.curkey == 71 || this.curkey == 103 ) {
 						// G,g
 						// was for debugging in the flash player ... maybe
@@ -3398,22 +3525,26 @@ evhh5v_controller.prototype = {
 			this.ntick = 0;
 		}
 		
-		// this hack is due to a bug in the
-		// rekonq browser (Ubuntu 12.04) in which
-		// the mouse_hide() in the this function
-		// causes a mousemove event! So, the ticker
-		// sets this.webkit_mousebug1 to a positive
-		// and decrements it to 0, avoiding the
-		// cycle. Sheesh.
-		if ( this.webkit_mousebug1 )
-			this.webkit_mousebug1--;
-
-		if ( ++this.ptrtick >= this.ptrtickmax ) {
-			this.webkit_mousebug1 = parseInt(this.ptrtickmax/10);//Oy!
-			this.mouse_hide();
-			if ( this.doshowbartime ) {
-				this.showhideBar(this.doshowbar = false);
+		if ( ! this.bar.volctl_mousedown ) {
+			// this hack is due to a bug in the
+			// rekonq browser (Ubuntu 12.04) in which
+			// the mouse_hide() in the this function
+			// causes a mousemove event! So, the ticker
+			// sets this.webkit_mousebug1 to a positive
+			// and decrements it to 0, avoiding the
+			// cycle. Sheesh.
+			if ( this.webkit_mousebug1 )
+				this.webkit_mousebug1--;
+	
+			if ( ++this.ptrtick >= this.ptrtickmax ) {
+				this.webkit_mousebug1 = parseInt(this.ptrtickmax/10);
+				this.mouse_hide();
+				if ( this.doshowbartime ) {
+					this.showhideBar(this.doshowbar = false);
+				}
+				this.ptrtick = 0;
 			}
+		} else {
 			this.ptrtick = 0;
 		}
 
@@ -3565,76 +3696,55 @@ evhh5v_controller.prototype = {
 	// SWF player, this *should* 1) stop playback 2) stop any media
 	// network transfer 3) re-init so that play() again is as if it
 	// was the first time -- do as much of this as possible and
-	// make the behavior at least look the same [after trying some
-	// simple things, and some insane things, it seems simple
-	// load() does the trick; the name doesn't suggest it would,
-	// but more slogging through the w3/whatwg spec did! No no no,
-	// while load alone worked for wobkit, behavior is different
-	// in ffox (of course), so discharge both barrels anyway]
+	// make the behavior at least look the same.
 	stop : function() {
 		this.stop_forced = true;
 		this.hide_wait();
-		/* these two were tried, but N.G. overall -- left
-		 * in place temporarily for reference 
-		// some per browser hacks seem to work
-		if ( false && this._vid.mozHasAudio !== undefined ) {
-			// this is not reliable: disabled
-			this._vid.pause();
-			this._vid.src = "";
-			this._vid.removeAttribute("src");
-		} else if ( false && this._vid.webkitDecodedFrameCount !== undefined ) {
-			this._vid.load(); // stops webkit download, causes ffox download; wonderful!
-			evhh5v_do_dbg_obj(["WEBKIT -- SRC REMOVED"]);
-		// but generally, since the spec does not provide a sensible
-		// way, a method of madness + shotgun must be employed:
-		} else {
-		*/
-		if ( true ) {
-			this._vid.pause();
-	
-			// make new similar video
-			var tv = document.createElement('video');
-			var att = ["poster", "loop", "width", "height", "id", "class", "name"];
-			while ( att.length ) {
-				var tn = att.shift();
-				var ta;
-				if ( ! (ta = this._vid.getAttribute(tn)) ) continue;
-				tv.setAttribute(tn, ta);
-			}
-			// regardless of original value, it seems that after user
-			// hits stop, the only reasonable 'preload' is 'none' --
-			// and obviously 'autostart' is not wanted
-			tv.setAttribute("preload", "none");
-			while ( this._vid.hasChildNodes() ) {
-				var tn = this._vid.firstChild.cloneNode(true);
-				tv.appendChild(tn);
-				this._vid.removeChild(this._vid.firstChild);
-			}
-	
-			// unload shotgun on old video
-			this._vid.src = null;
-			this._vid.removeAttribute("src");
-			// spec says currentSrc readonly; ffox and webkit do not complain
-			try { this._vid.currentSrc = null; } catch(e) {}
-			// hopefully, w/ no source, this will stop current transfers;
-			// per spec it should, and yes, it provides a way to stop
-			// webkit from fetching the media
-			this._vid.load();
-	
-			// hook up new video; ready for play()
-			if ( ! this.is_canvas ) {
-				this._vid.parentNode.replaceChild(tv, this._vid);
-			}
-			try { delete this._vid; } catch(e) {}
+		this._vid.pause();
 
-			this._vid = tv;
-			this._vid.evhh5v_controller = this;
-			this.setup_aspect_factors();
-			this.install_handlers(true);
+		// make new similar video
+		var tv = document.createElement('video');
+		var att = ["poster", "loop", "width", "height", "id", "class", "name"];
+		while ( att.length ) {
+			var tn = att.shift();
+			var ta;
+			if ( ! (ta = this._vid.getAttribute(tn)) ) continue;
+			tv.setAttribute(tn, ta);
 		}
 
+		// regardless of original value, it seems that after user
+		// hits stop, the only reasonable 'preload' is 'none' --
+		// and obviously 'autostart' is not wanted
+		tv.setAttribute("preload", "none");
+		while ( this._vid.hasChildNodes() ) {
+			var tn = this._vid.firstChild.cloneNode(true);
+			tv.appendChild(tn);
+			this._vid.removeChild(this._vid.firstChild);
+		}
+
+		// unload shotgun on old video
+		this._vid.src = null;
+		this._vid.removeAttribute("src");
+		// spec says currentSrc readonly; ffox and webkit do not complain
+		try { this._vid.currentSrc = null; } catch(e) {}
+		// hopefully, w/ no source, this will stop current transfers;
+		// per spec it should, and yes, it provides a way to stop
+		// webkit from fetching the media
+		this._vid.load();
+
+		// hook up new video; ready for play()
+		if ( ! this.is_canvas ) {
+			this._vid.parentNode.replaceChild(tv, this._vid);
+		}
+		try { delete this._vid; } catch(e) {}
+
+		this._vid = tv;
+		this._vid.evhh5v_controller = this;
+		this.setup_aspect_factors();
+		this.install_handlers(true);
 		this.gotmetadata = this.playing = false;
 		this.put_canvas_poster();
+
 		// control bar maintenance
 		this.bar.show_playico();
 		this.bar.progress_pl(1);
@@ -3660,9 +3770,11 @@ evhh5v_controller.prototype = {
 	// go fullscreen where possible
 	fullscreen : function() {
 		// possible?
-		if ( ! evhh5v_fullscreen.capable() ) {
+		if ( ! (this.allowfull && evhh5v_fullscreen.capable()) ) {
 			this.bar.blur_fullscreen();
-			alert("As it turns out, full screen mode is not available. Sigh.");
+			if ( this.allowfull ) {
+				alert("Full screen mode is not available.");
+			}
 			return;
 		}
 
@@ -3700,7 +3812,7 @@ evhh5v_controller.prototype = {
 						evhh5v_fullscreen.handle_error(t.orig_fs_error_func);
 						t.orig_fs_change_func = null; // release reference
 						t.orig_fs_error_func = null;
-						alert("Full screen mode failed for an unknown reason.");
+						alert("Full screen mode failed.");
 					});
 
 				evhh5v_fullscreen.request(p);
@@ -3708,10 +3820,12 @@ evhh5v_controller.prototype = {
 				evhh5v_fullscreen.exit();
 			}
 		} catch ( ex ) {
-			alert(ex.name + ": '" + ex.message + "'");
+			alert(ex.name + ': "' + ex.message + '"');
 		}
 	},
 	togglevolctl : function() {
+		// delay pointer/bar hiding for volume interaction
+		this.ptrtick = 0;
 		if ( ! this.volctl_showing ) {
 			this.show_volctl();
 		} else {
@@ -3744,22 +3858,10 @@ evhh5v_controller.prototype = {
 		}
 	},
 	show_wait_ok : function() {
-		// Sigh. Chrom(e|ium)/33.* has broken display re-draw when
-		// parent div of wait indicator is moved into place.
-		// Earlier Chrom* were fine (in this regard). Note that
-		// I mean the Chrom* component that is used in Opera too,
-		// the exact same bug is seen there with latest version
-		// and it too reports /33.* in its UA string.
-		// I spent hours looking for a workaround but found
-		// nothing, except to disable the spinner.
-		// Per Murphy's law, this occurs just as I am on the point
-		// of releasing this; just in time to make *my* player
-		// look bad. Thanks chromium guys.
 		if ( this.chrome_show_wait_bad === undefined ) {
 			this.chrome_show_wait_bad =
-			this.params['chromium_force_show_wait'] ?
-			false :
-			/Chrom(e|ium)\/([4-9][0-9]|3[3-9])\./i.test(navigator["userAgent"]);
+				this.params['chromium_force_show_wait'] ?
+				false : this.chrome_draw_bug;
 		}
 		if ( this.chrome_show_wait_bad ) {
 			return false;
@@ -3845,15 +3947,21 @@ evhh5v_controller.prototype = {
 	protoplasmaticism : true
 };
 
-/* each loaded instance of the bar svg will call this from
- * its own script and pass the parameters it receives from
- * the object (tag) that loaded it; this is how each is id'd
- * and glued to associated objects
- */
+
+/**********************************************************************\
+ *                                                                    *
+ * Support procedures and data structures for the SVG control bar     *
+ *                                                                    *
+\**********************************************************************/
+
 var evhh5v_ctlbarmap = {};
 var evhh5v_ctlbutmap = {};
 var evhh5v_ctlvolmap = {};
 
+// each loaded instance of the bar svg will call this from
+// its own (child browsing context) script and pass the
+// parameters it receives from the object (tag) that loaded it;
+// this is how each is id'd and glued to associated objects
 function evhh5v_put_ctlbarmap(parms) {
 	if ( ! parms["parentdiv"] || ! parms["role"] ) {
 		console.log("evhh5v_put_ctlbarmap was passed a foul object: no parentdiv or role: " + parms);
@@ -3870,6 +3978,11 @@ function evhh5v_put_ctlbarmap(parms) {
 	map[parms["parentdiv"]]["loaded"] = false;
 };
 
+// these evhh5v_*load procs are assigned to the inline
+// 'onload' attributes of the *bar SVG <object>s primarily
+// to set the 'loaded' property of the relevant data structure
+// member; evhh5v_ctlbarload also constructs the evhh5v_controlbar
+// object that builds and maintains the SVG elements
 function evhh5v_ctlbarload(obj, divid) {
 	var p = evhh5v_ctlbarmap[divid];
 	p.evhh5v_controlbar = new evhh5v_controlbar(p);
@@ -3886,24 +3999,87 @@ function evhh5v_ctlvolload(obj, divid) {
 }
 
 
-function evhh5v_do_dbg_obj(o) {
-/* debug object function -- comment-out for release;
- * just body content, not definition, so refs may remain
-	var dt;
-	if ( ! (dt = document.getElementById("dbg_area")) ) return;
-	
-	var n = 0;
-	for ( var k in o ) {
-		dt.value += "" + (n++) + " [" + k + "]) " + o[k] + "\n";
+/**********************************************************************\
+ *                                                                    *
+ * Support procedures for all the above                               *
+ *                                                                    *
+\**********************************************************************/
+
+// preferably do not add query string to svg url where
+// it is known to be not needed (actually, I know only
+// that MSIE *does* need it, but it is safer to be certain
+// it is not needed) -- this function will test only once
+// and return true if we are not confident the user agent
+// does *not* need a query string for the svg parameters
+function evhh5v_need_svg_query() {
+	if ( document.evhh5v_need_svg_query_bool !== undefined ) {
+		return document.evhh5v_need_svg_query_bool;
 	}
- */
+	document.evhh5v_need_svg_query_bool = ( !
+	/(FireFox|WebKit|KHTML|Chrom[ie]|Safari|OPR\/|Opera)/i.test(navigator["userAgent"])
+	) == false;
+	
+	return document.evhh5v_need_svg_query_bool;
+};
+
+// is the browser, or 'user agent', mobile?
+// [lifted from WordPress php]
+function evhh5v_ua_is_mobile() {
+	if ( document.evhh5v_ua_is_mobile_bool !== undefined ) {
+		return document.evhh5v_ua_is_mobile_bool;
+	}
+
+	document.evhh5v_ua_is_mobile_bool = false;
+	var ua = navigator["userAgent"];
+	
+	if (   ua.indexOf('Mobile') >= 0 // many mobile devices (all iPhone, iPad, etc.)
+		|| ua.indexOf('Android') >= 0
+		|| ua.indexOf('Silk/') >= 0
+		|| ua.indexOf('Kindle') >= 0
+		|| ua.indexOf('BlackBerry') >= 0
+		|| ua.indexOf('Opera Mini') >= 0
+		|| ua.indexOf('Opera Mobi') >= 0 ) {
+		document.evhh5v_ua_is_mobile_bool = true;
+	}
+
+	return document.evhh5v_ua_is_mobile_bool;
+};
+
+// Unfortunately some browser brokenness must be handled under
+// some circumstances; e.g., a not-current Opera under FreeBSD
+// tested fine with all this until it was integrated with the
+// the SWFPut WordPress plugin, in which context the outer <div>
+// was not adjusting its height properly (seemingly confused that
+// the first fallback element under the flash <object> was a <div>
+// because in earlier versions of the plugin there was no problem:
+// the div is the most obvious difference).
+// So, corrective measures may be added here as needed.
+function evhh5v_fixup_elements(parms) {
+	var ip = parms["iparm"];
+
+	if ( /Opera/i.test(navigator["userAgent"]) ) {
+		var t = document.getElementById(ip["auxdiv"]);
+		if ( t && t.parentNode && t.parentNode.nodeName.toLowerCase() === "object" ) {
+			var p = t.parentNode;
+			var d = p.parentNode;
+			p.removeChild(t);
+			d.replaceChild(t, p);
+		}
+	}
 }
 
-
-
-
-
-
-
-
-
+// borrowed from:
+// http://robertnyman.com/2006/04/24/get-the-rendered-style-of-an-element/
+// get 'computed' style of element
+var evhh5v_getstyle = function (el, sty) {
+	var v = 0;
+	if ( document.defaultView && document.defaultView.getComputedStyle ) {
+		v = document.defaultView.getComputedStyle(el, "").getPropertyValue(sty);
+	} else if ( el.currentStyle ) {
+		sty = sty.replace(/\-(\w)/g, function (m1, p1) {
+			return p1.toUpperCase();
+		});
+		v = el.currentStyle[sty];
+	}
+	return v;
+};
