@@ -179,10 +179,22 @@ function fix_url($u) {
 
 		if ( $tsv === '' ) {
 			$tpr = '';
-		} else if ( isset($_SERVER['SERVER_PORT']) ) {
+		} else if ( false && isset($_SERVER['SERVER_PORT']) ) {
 			$tpt = '' . $_SERVER['SERVER_PORT'];
-			if ( ($tpr === 'http://' && $tpt !== '80')
-				|| ($tpr === 'https://' && $tpt !== '443') ) {
+			// cannot use this logic: assumption that https==443
+			// and http==80, and that specifying port for anything
+			// else is good, is a false assumption
+			if ( false && (($tpr === 'http://' && $tpt !== '80')
+				|| ($tpr === 'https://' && $tpt !== '443')) ) {
+				$tsv = explode(':', $tsv);
+				$tsv = $tsv[0] . ':' . $tpt;
+			// even this is n.g.: hosting hacks are prone to
+			// change server vars in unpredictable ways that do not
+			// match the form of a valid request to the host --
+			// so don't get clever here (and leave this code as
+			// a reminder) -- if name:port is needed, user must
+			// know that and provide suitable URLs.
+			} else if ( false && $tpt !== '80' && $tpt !== '443' ) {
 				$tsv = explode(':', $tsv);
 				$tsv = $tsv[0] . ':' . $tpt;
 			}
@@ -191,6 +203,70 @@ function fix_url($u) {
 		$u = $tpr . $tsv . '/' . ltrim($u, '/');
 	}
 	return $u;
+}
+
+// normalize H5V type string from user input -- NOT using
+// W3.org form, which does not work in existing browsers
+// such as Opera (at least GNU/Linux), or older FFox (v 10+?)
+// W3 experimental H5 validator says form made here is in error,
+// but we assume that if approved and useful are a 
+// one-or-the-other choice then the latter is preferred
+function clean_h5vid_type($str) {
+	// help text instructs user NOT to give 'type='
+	// but just in case . . .
+	$t = explode('=', $str);
+	if ( ! strcasecmp(trim($t[0]), 'type') ) {
+		array_shift($t);
+		$str = trim(implode('=', $t), "'\\\" ");
+	}
+	
+	// separate mime type and any codecs arg
+	$t = explode(';', $str);
+	
+	// type
+	$ty = explode('/', $t[0]);
+	// if incorrect type form, no value will have to work
+	if ( count($ty) < 2 ) {
+		return '';
+	}
+	// no further check on type parts: beyond our purview
+	$ty = trim($ty[0], "'\\\" ") . '/' . trim($ty[1], "'\\\" ");
+
+	// got type only
+	if ( count($t) < 2 ) {
+		return $ty;
+	}
+	
+	// codecs
+	$t = explode('=', trim($t[1], "'\\\" "));
+	// if incorrect codecs arg, no value will probably work
+	if ( count($t) < 2 ) {
+		return $ty;
+	}
+	if ( strcasecmp($t[0] = trim($t[0], "'\\\" "), 'codecs') ) {
+		// allow mistake in plural form
+		if ( strcasecmp($t[0], 'codec') ) {
+			return $ty;
+		}
+	}
+
+	// codecs args
+	$t = trim($t[1], "'\\\" ");
+	$t = explode(',', $t);
+
+	// rebuild codecs args as comma sep'd value in the form
+	// that has been found to work in existing browsers;
+	// reuse $str for new value
+	$str = trim($t[0], "'\\\" ");
+	for ( $i = 1; $i < count($t); $i++ ) {
+		// NO SPACE after comma: browsers might reject source!
+		$str .= ',' . trim($t[$i], "'\\\" ");
+	}
+	
+	// NO QUOTES on codecs arg: browsers might reject source!
+	// This contradicts examples at W3, but ultimately the
+	// the browsers dictate what works
+	return sprintf("%s; codecs=%s", $ty, $str);
 }
 
 // now, setup for and do output
@@ -212,7 +288,7 @@ $jatt['a_vid'] = array(
 	'srcs'      => array(),
 	'altmsg'    => getwithdef('altmsg', 'Video is not available'),
 	'caption'	=> getwithdef('caption', ''),
-	'aspect'	=> getwithdef('aspect', '4:3')
+	'aspect'	=> getwithdef('aspect', '0')
 );
 
 $vstdk = array('play', 'loop', 'volume',
@@ -253,8 +329,30 @@ if ( ($k = getwithdef('altvideo', '')) != '' ) {
 	foreach ( $a as $k ) {
 		$t = explode('?', trim($k));
 		$v = array('src' => maybe_get_attach(trim($t[0])));
-		if ( isset($v[1]) ) {
-			$v['type'] = trim($v[1]);
+		if ( ! isset($t[1]) ) {
+			// not given: infer from suffix,
+			// patterns always subject to revision
+			$pats = array(
+				'/.*\.(mp4|m4v|mv4)$/i',
+				'/.*\.(og[gv]|vorbis)$/i',
+				'/.*\.(webm|wbm|vp[89])$/i'
+			);
+			if ( preg_match($pats[0], $v['src']) ) {
+				$tv[1] = 'video/mp4';
+			} else if ( preg_match($pats[1], $v['src']) ) {
+				$tv[1] = 'video/ogg';
+			} else if ( preg_match($pats[2], $v['src']) ) {
+				$tv[1] = 'video/webm';
+			}
+			// not fatal if not found
+			if ( isset($tv[1]) ) {
+				$v['type'] = $tv[1];
+			}
+		} else {
+			$t[1] = clean_h5vid_type($t[1]);
+			if ( $t[1] !== '' ) {
+				$v['type'] = $t[1];
+			}
 		}
 		$jatt['a_vid']['srcs'][] = $v;
 	}
@@ -299,7 +397,7 @@ $allvids[] = $jatt;
 	$w = $v['width'];
 	$h = $v['height'];
 	$barhi = $v['barheight'];
-	$asp = array_key_exists('aspect', $v) ? $v['aspect'] : 0;
+	$asp = array_key_exists('aspect', $v) ? $v['aspect'] : '0';
 	$parentdiv = "div_wp_media_".$i;
 	$auxdiv = "div_vidoj_".$i;
 	$vidid = "va_o_putswf_video_".$i;
@@ -312,12 +410,10 @@ $allvids[] = $jatt;
 		// sources
 		for ( $j = 0; $j < count($ss); $j++ ) {
 			$s = $ss[$j];
-			$src = sprintf('<source src="%s"%s>'."\n", $s['src'],
+			printf('<source src="%s"%s>'."\n", $s['src'],
 				isset($s['type']) && $s['type'] != '' ?
 					sprintf(' type="%s"', $s['type']) : ''
 			);
-			//error_log('source: ' . $src);
-			echo $src;
 		}
 		if ( array_key_exists('tracks', $v) )
 		for ( $j = 0; $j < count($v['tracks']); $j++ ) {
