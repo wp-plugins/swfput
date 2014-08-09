@@ -119,7 +119,9 @@ function SWFPut_repl_nl(str) {
 			playpath: "",
 			altvideo: "",
 			classid: "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000",
-			codebase: "http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0"
+			codebase: "http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0",
+			align: "center",	
+			preload: "image"
 		},
 
 		init : function(ed, url) {
@@ -448,9 +450,8 @@ function SWFPut_repl_nl(str) {
 			return dat;
 		},
 
-		_sc_atts2if : function(url, ats, id, cap) {
+		_sc_atts2if : function(url, dat, id, cap) {
 			var t = this;
-			var dat = t._sc_atts2qs(ats, cap);
 			var qs = dat.qs;
 			var w = parseInt(dat.width), h = parseInt(dat.height);
 			var dlw = w + 60, fw = w + 16, fh = h + 16; // ugly
@@ -467,7 +468,7 @@ function SWFPut_repl_nl(str) {
 			// for clarity, use separate vars for classes, accepting
 			// slightly more inefficiency in the concatenation chain
 			// [yearning for sprintf()]
-			var cls = ' aligncenter';
+			var cls = ' align' + dat.align;
 			var cldl = 'wp-caption evh-pseudo-dl ' + cls;
 			var cldt = 'wp-caption-dt evh-pseudo-dt';
 			var cldd = 'wp-caption-dd evh-pseudo-dd';
@@ -504,11 +505,12 @@ function SWFPut_repl_nl(str) {
 				t.sc_map[ky].n1 = n1 || '';
 				t.sc_map[ky].n2 = n2 || '';
 				
-				var dat = t._sc_atts2if(t.urlfm, atts, 'evh-'+ky, cap);
+				var dat = t._sc_atts2qs(atts, cap);
+				dat = t._sc_atts2if(t.urlfm, dat, 'evh-'+ky, cap);
 				var w = dat.width, h = dat.height;
 				var dlw = parseInt(w) + 60; // ugly
-				//var cls = 'mceTemp mceIEcenter';
-				var cls = 'evhTemp';
+				var cls = 'evhTemp mceIE' + dat.align
+					+ ' align' + dat.align;
 
 				var r = n1 || '';
 				r += p1 || '';

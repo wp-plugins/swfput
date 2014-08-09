@@ -1,5 +1,5 @@
-<!-- Creator     : groff version 1.21 -->
-<!-- CreationDate: Sat May  3 16:48:11 2014 -->
+<!-- Creator     : groff version 1.22.2 -->
+<!-- CreationDate: Sat Aug  9 09:25:02 2014 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -503,25 +503,33 @@ option is on by default.</p></td></tr>
 
 
 <p style="margin-top: 1em"><b>Pixel Width &times;
-Height</b>: set these to the desired size of the video
+Height</b>: Set these to the desired size of the video
 player&rsquo;s embedded window. This does not need to be the
 same as the display size of the video to be played, but the
 appearance will be best if the <i>aspect</i> of the
 player&rsquo;s display is the same as the display aspect of
-the video. For example, if set for a video with a size of
-400&times;300, then setting these to fields to 320&times;240
-would look good (the width:height ratio is the same). In any
-case, the player will scale the video to fit within its
-display, but it maintains the aspect ratio, so horizontal or
-vertical black (unused) areas will be visible if the aspect
-ratios do not match. These dimensions are not fixed unless
-scripts are disabled. Where scripting is available, the
-video display area is resized in concert with changes that
-the browser applies to the surrounding elements. This is
-particularly important on mobile platforms, where the
-browser will probably make extreme size adjustments for the
-small display size (This behavior might depend on the
-current theme).</p></td></tr>
+the video. For example, with a video of a size of
+400&times;300 setting these to fields to 320&times;240 would
+look good, as the width:height ratios are the same.</p></td></tr>
+</table>
+
+<p style="margin-left:20%; margin-top: 1em">The player will
+scale the video to fit within its display, but it maintains
+the aspect ratio, so horizontal or vertical black (unused)
+areas will be visible if the aspect ratios do not match.</p>
+
+<p style="margin-left:20%; margin-top: 1em">These
+dimensions are not fixed unless scripts are disabled in the
+browser. Where scripting is available, the video display
+area is resized in concert with changes that the browser
+applies to the surrounding elements. This is particularly
+important on mobile platforms, where the browser will
+probably make extreme size adjustments for the small display
+size. This &ldquo;responsive&rdquo; behavior will depend on
+the current theme being responsive.</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
 <tr valign="top" align="left">
 <td width="10%"></td>
 <td width="2%">
@@ -536,14 +544,21 @@ current theme).</p></td></tr>
 provide a width to use only if a mobile browser is detected;
 the height is automatically proportional, according to the
 regular &ldquo;<b>Pixel Width &times; Height</b>&rdquo;
-dimensions described above. This might be used for widgets
-placed on the sidebar, because the sidebar might be placed
-below, rather than beside, the main content. In this case
-more space might be available, and larger display might be
-suitable. This feature is disabled with a value of
-&rsquo;0,&rsquo; which is the default, and has no effect if
-the browser is not identified as being on a mobile
-platform.</p> </td></tr>
+dimensions described above.</p></td></tr>
+</table>
+
+<p style="margin-left:20%; margin-top: 1em">This might be
+most useful for widgets placed on a &lsquo;sidebar,&rsquo;
+because a sidebar might be placed below, rather than beside,
+the main content. In this case more effective display width
+might be available, and a wider display might be suitable.
+This feature is disabled with a value of &rsquo;0,&rsquo;
+which is the default, and has no effect if the browser
+provides a user agent string not known as a mobile
+platform.</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
 <tr valign="top" align="left">
 <td width="10%"></td>
 <td width="2%">
@@ -622,10 +637,112 @@ disables this field.</p></td></tr>
 <td width="80%">
 
 
+<p style="margin-top: 1em"><b>Alignment</b>: This is an
+exclusive selection with options &lsquo;left,&rsquo;
+&lsquo;center,&rsquo; &lsquo;right,&rsquo; and
+&lsquo;none.&rsquo; The default is <i>center</i>. This
+option will set the alignment of the video display within
+the page or post by adding a CSS class called one of
+&lsquo;.alignleft,&rsquo; &lsquo;.aligncenter,&rsquo;
+&lsquo;.alignright,&rsquo; or &lsquo;.alignnone.&rsquo; A
+<i>WordPress</i> theme should provide CSS definitions for
+the first three of those classes. The fourth,
+.<i>alignnone</i>, is meant to use the alignment that the
+video markup inherits, whatever it might be. (If there is a
+CSS definition for .<i>alignnone</i> hopefully it will have
+a sensible effect.)</p></td></tr>
+</table>
+
+<p style="margin-left:20%; margin-top: 1em">Because this
+option works with classes, which depend on CSS definitions,
+it is ultimately the user&rsquo;s <i>WordPress</i> theme
+that provide the effect of this option. For example, if a
+theme provides a left or right margin for the
+&lsquo;.widget&rsquo; class, then this plugin&rsquo;s video
+widget might not align according to this option.</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="2%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="8%"></td>
+<td width="80%">
+
+
+<p style="margin-top: 1em"><b>Video preload</b>: This is an
+exclusive selection. HTML5 video allows a
+&ldquo;preload&rdquo; attribute with a value of
+&ldquo;none&rdquo; or &ldquo;metadata&rdquo; or
+&ldquo;auto.&rdquo; This option provides those three values
+and one special selection: &ldquo;per initial image.&rdquo;
+This special selection will use &ldquo;none&rdquo; if an
+&ldquo;initial image file&rdquo; is set (in the <b>Media</b>
+section of the form), or &ldquo;metadata&rdquo; if an
+initial image, or <i>poster</i>, is not set.</p></td></tr>
+</table>
+
+<p style="margin-left:20%; margin-top: 1em">The
+&ldquo;metadata&rdquo; selection allows the browser to fetch
+a small part of the video file with information such as
+video dimensions, duration, and the codec types
+<small><small>2</small></small> .</p>
+
+<p style="margin-left:20%; margin-top: 1em"><cite>In most
+of the supported video file types, the browser should be
+able to find the metadata without needing to retrieve too
+much data. </cite></p>
+
+<p style="margin-left:20%; margin-top: 1em">This can be
+useful because a browser might also receive some of the
+video frames, and so it may display one frame as a
+&lsquo;poster.&rsquo; (Whether a frame displayed this way is
+suitable is not certain.)</p>
+
+<p style="margin-left:20%; margin-top: 1em">If
+&ldquo;none&rdquo; is selected the browser will not fetch
+any of the video until it is played, and so without an
+initial image, the video region on the page will be solid
+black until played.</p>
+
+<p style="margin-left:20%; margin-top: 1em">The
+&ldquo;auto&rdquo; selection should be avoided unless you
+know what it does and that you need it. This is because with
+&ldquo;auto&rdquo; the browser may choose to fetch the
+entire video even before the visitor actively plays the
+video. Video files can be quite large, and a large
+unsolicited download might be unkind to your site&rsquo;s
+visitors; it might even cause a visitor additional charges
+depending on their connection service. Also consider your
+server and network load.</p>
+
+<p style="margin-left:20%; margin-top: 1em">The flash
+player does not have similar attributes, but will behave
+similarly with regard to an initial image: if one was not
+set, and the preload option is not &ldquo;none,&rdquo; then
+the player will start playback and let it advance for a
+small random period, and then pause playback, leaving a
+visible frame to act as a &lsquo;poster.&rsquo;</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="2%">
+
+
+<p style="margin-top: 1em">&bull;</p></td>
+<td width="8%"></td>
+<td width="80%">
+
+
 <p style="margin-top: 1em"><b>Initial volume</b>: The video
-player has a volume control that visitors can adjust, but
-this field will set a default volume. If the web browser
-flash plugin is permitted to save values locally on a
+player has a volume control that visitors can adjust. This
+field will set a default volume. If the web browser flash
+plugin is permitted to save values locally on a
 visitor&rsquo;s machine, then their adjustment will be
 saved, and will be used rather than the default when they
 visit again (or reload the page). User settings are not
@@ -643,12 +760,21 @@ saved for the HTML5 video player presently.</p></td></tr>
 <p style="margin-top: 1em"><b>Play on load</b>: This will
 cause the video to begin playing as soon as the player
 program is loaded. When this is not set, the player waits
-for the play button. (Above, it was stated that if scripting
-is not available, HTML5 video would have the default
-appearance and behavior provided by the web browser. This
-play on load option will not be in effect in that case,
-because while the video element can take an autoplay
-attribute, that cannot work the scripted HTML5 player.)</p></td></tr>
+for the play button.</p></td></tr>
+</table>
+
+<p style="margin-left:20%; margin-top: 1em">Above, it was
+stated that if scripting is not available in the web
+browser, HTML5 video will have the default appearance and
+behavior provided by the web browser. The play on load
+option will not be in effect in that case, because while the
+video element can take an autoplay attribute, that cannot
+reliably work with the scripted HTML5 player since it might
+begin before the script gains control of the video
+element.</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
 <tr valign="top" align="left">
 <td width="10%"></td>
 <td width="2%">
@@ -680,14 +806,21 @@ obscure an initial image). Note that this also changes the
 control bar behavior in general: the bar will show whenever
 mouse movement is detected within the embedded window, and
 hide again when there has been no mouse movement for a few
-seconds. When this is not set, the control bar is left
-showing when the player loads, and thereafter is always
-shown when the mouse is within the embedded window, and is
-always hidden when the mouse is <i>detected</i> leaving the
-window (when the mouse is moved out of the player window
-with rapid motion the browser or plugin often fails to
-deliver a &lsquo;mouse has left&rsquo; event to the player
-program, so hiding the bar is not always reliable).</p></td></tr>
+seconds.</p> </td></tr>
+</table>
+
+<p style="margin-left:20%; margin-top: 1em">When this is
+not set, the control bar is left showing when the player
+loads, and thereafter is always shown when the mouse is
+within the embedded window, and is always hidden when the
+mouse is <i>detected</i> leaving the window (when the mouse
+is moved out of the player window with rapid motion the
+browser or plugin often fails to deliver a &lsquo;mouse has
+left&rsquo; event to the player program, so hiding the bar
+is not always reliable).</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
 <tr valign="top" align="left">
 <td width="10%"></td>
 <td width="2%">

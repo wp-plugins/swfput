@@ -1,9 +1,9 @@
 <?php
 /*
 Plugin Name: SWFPut
-Plugin URI: http://agalena.nfshost.com/b1/?page_id=46
+Plugin URI: http://agalena.nfshost.com/b1/swfput-html5-flash-wordpress-plugin
 Description: Add Flash and HTML5 video to WordPress posts, pages, and widgets, from arbitrary URI's or media library ID's or files in your media upload directory tree (including uploads not in the WordPress media library).
-Version: 2.1.1
+Version: 2.2
 Author: Ed Hynan
 Author URI: http://agalena.nfshost.com/b1/
 License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
@@ -42,7 +42,7 @@ Text Domain: swfput_l10n
 // check for naughty direct invocation; w/o this we'd soon die
 // from undefined WP functions anyway, but let's check anyway
 if ( basename(__FILE__) == basename($_SERVER['SCRIPT_FILENAME']) ) {
-	die("Oh, you naughty boy||girl||other!\n");
+	die("No, do not invoke this directly.\n");
 }
 
 // supporting classes found in files named "${cl}.inc.php"
@@ -82,9 +82,7 @@ endif;
 if ( ! function_exists( 'swfput_php52_htmlent' ) ) :
 function swfput_php52_htmlent ($text, $cset = null)
 {
-	// try to use get_option('blog_charset') only once;
-	// it's not cheap enough even with WP's cache for
-	// the number of times this might be called
+	// try to use get_option('blog_charset') only once
 	static $_blog_charset = null;
 	if ( $_blog_charset === null ) {
 		$_blog_charset = get_option('blog_charset');
@@ -113,10 +111,10 @@ endif;
 if ( ! class_exists('SWF_put_evh') ) :
 class SWF_put_evh {
 	// web page as of release
-	const plugin_webpage = 'http://agalena.nfshost.com/b1/?page_id=46';
+	const plugin_webpage = 'http://agalena.nfshost.com/b1/swfput-html5-flash-wordpress-plugin';
 	
 	// this version
-	const plugin_version = '2.1.1';
+	const plugin_version = '2.2.0';
 	
 	// the widget class name
 	const swfput_widget = 'SWF_put_widget_evh';
@@ -1699,405 +1697,11 @@ class SWF_put_evh {
 	 */
 
 	// put form that with some js will help with shortcodes in
-	// the WP post editor: following example at:
+	// the WP post editor
 	public static function put_xed_form() {
-		// cap check is done at registration of this callback
-		$pr = self::swfput_params;
-		$pr = new $pr();
-		extract($pr->getparams());
-
-		$sc = self::shortcode;
-		// file select by ext pattern
-		$mpat = self::get_mfilter_pat();
-		// files array from uploads dirs (empty if none)
-		$rhu = self::r_find_uploads($mpat['m'], true);
-		$af = &$rhu['uploadfiles'];
-		$au = &$rhu['uploadsdir'];
-		$aa = &$rhu['medialib'];
-		// url base for upload dirs files
-		$ub = rtrim($au['baseurl'], '/') . '/';
-		// directory base for upload dirs files
-		$up = rtrim($au['basedir'], '/') . '/';
-		// id base for form and js
-		$id = 'SWFPut_putswf_video';
-		// label format string
-		$lbfmt = '<label for="%s_%s">%s</label>';
-		// table <input type="text"> format string
-		$infmt = '<input type="text" size="40" style="width:%u%%;" name="%sX%sX" id="%s_%s" value="%s" />';
-		// table <input type="checkbox"> format string
-		$ckfmt = '<input type="checkbox" name="%sX%sX" id="%s_%s" value="%s" %s/>';
-		// js function object
-		$job = $id . '_inst';
-		// form buttons format string
-		$bjfmt = '<input type="button" class="button" onclick="return %s.%s;" value="%s" />';
-		// form <select > format string
-		$slfmt = '<select name="%sX%sX" id="%s_%s" style="width:%u%%;" onchange="return %s.%s;">' . "\n";
-		// form <select > <optgroup > format string
-		$sgfmt = '<optgroup label="%s">' . "\n";
-		// form <select > <option > format string
-		$sofmt = '<option value="%s">%s</option>' . "\n";
-		// js send form values to editor method
-		$jfu = "send_xed(this.form,'{$id}','caption','{$sc}')";
-		// js reset form to defaults method
-		$jfur = "reset_fm(this.form,'{$id}')";
-		// js fill form from editor if possible
-		$jfuf = "from_xed(this.form,'{$id}','caption','{$sc}')";
-		// js replace last found shortcode in editor
-		$jfuc = "repl_xed(this.form,'{$id}','caption','{$sc}')";
-		// js delete last found shortcode from editor
-		$jfud = "rmsc_xed(this.form,'{$id}','caption','{$sc}')";
-		// js to copy from select/dropdown to text input
-		$jfsl = "form_cpval(this.form,'%s','%s','%s')";
-		// js to append from select/dropdown to text input
-		$jfap = "form_apval(this.form,'%s','%s','%s')";
-		// input text widths, wide, narrow
-		$iw = 100; $in = 8; // was: $in = 16;
-		// incr var for sliding divs
-		$ndiv = 0;
-		// button format for sliding divs
-		$dbfmt = '<input type="button" class="button" id="%s" value="%s" onclick="%s.%s" />';
-		// button values for sliding divs
-		$dbvhi = self::wt(__('Hide', 'swfput_l10n'));
-		$dbvsh = self::wt(__('Show', 'swfput_l10n'));
-		// js to show/hide sliding divs
-		$jdsh = "hideshow('%s', this.id, '{$dbvhi}', '{$dbvsh}')";
-		// class and base of id for sliding divs
-		$dvio = $id . '_odiv';
-		$dvii = $id . '_idiv';
-		
-		// begin form
-		?>
-		<!-- form buttons, in a table -->
-		<table id="<?php echo $id . '_buttons'; ?>"><tr><td>
-			<span  class="submit">
-			<?php
-				$l = self::wt(__('Fill from post', 'swfput_l10n'));
-				printf($bjfmt, $job, $jfuf, $l);
-				$l = self::wt(__('Replace current in post', 'swfput_l10n'));
-				printf($bjfmt, $job, $jfuc, $l);
-				$l = self::wt(__('Delete current in post', 'swfput_l10n'));
-				printf($bjfmt, $job, $jfud, $l);
-				$l = self::wt(__('Place new in post', 'swfput_l10n'));
-				printf($bjfmt, $job, $jfu, $l);
-				$l = self::wt(__('Reset defaults', 'swfput_l10n'));
-				printf($bjfmt, $job, $jfur, $l);
-			?>
-			</span>
-		</td></tr></table>
-
-		<?php $ndiv++;
-			$dvon = $dvio . $ndiv;
-			$dvin = $dvii . $ndiv;
-			$dvib = $dvin . '_btn';
-			$jdft = sprintf($jdsh, $dvin);
-		?>
-		<div class="<?php echo $dvio; ?>" id="<?php echo $dvon; ?>">
-		<span class="submit">
-			<?php printf($dbfmt, $dvib, $dbvhi, $job, $jdft); ?>
-		</span>
-		<h3 class="hndle"><span><?php
-			echo self::wt(__('Media', 'swfput_l10n')); ?></span></h3>
-		<div class="<?php echo $dvii; ?>" id="<?php echo $dvin; ?>">
-
-		<p>
-		<?php $k = 'caption';
-			$l = self::wt(__('Caption:', 'swfput_l10n'));
-			printf($lbfmt, $id, $k, $l);
-			printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
-		</p><p>
-		<?php $k = 'url';
-			$l = self::wt(__('Flash video URL or media library ID (.flv or .mp4):', 'swfput_l10n'));
-			printf($lbfmt, $id, $k, $l);
-			printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
-		</p>
-		<?php
-			// if there are upload files, print <select >
-			$kl = $k;
-			if ( count($af) > 0 ) {
-				echo "<p>\n";
-				$k = 'files';
-				$jfcp = sprintf($jfsl, $id, $k, $kl);
-				$l = self::wt(__('Select flash video URL from uploads directory:', 'swfput_l10n'));
-				printf($lbfmt, $id, $k, $l);
-				// <select>
-				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfcp);
-				// <options>
-				printf($sofmt, '', self::wt(__('none', 'swfput_l10n')));
-				foreach ( $af as $d => $e ) {
-					$hit = array();
-					for ( $i = 0; $i < count($e); $i++ )
-						if ( preg_match($mpat['av'], $e[$i]) )
-							$hit[] = &$af[$d][$i];
-					if ( empty($hit) )
-						continue;
-					printf($sgfmt, self::ht($d));
-					foreach ( $hit as $fv ) {
-						$tu = rtrim($ub, '/') . '/' . $d . '/' . $fv;
-						$fv = self::ht($fv);
-						printf($sofmt, self::et($tu), $fv);
-					}
-					echo "</optgroup>\n";
-				}
-				// end select
-				echo "</select><br />\n";
-				echo "</p>\n";
-			} // end if there are upload files
-			if ( ! empty($aa) ) {
-				echo "<p>\n";
-				$k = 'atch';
-				$jfcp = sprintf($jfsl, $id, $k, $kl);
-				$l = self::wt(__('Select ID for flash video from media library:', 'swfput_l10n'));
-				printf($lbfmt, $id, $k, $l);
-				// <select>
-				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfcp);
-				// <options>
-				printf($sofmt, '', self::wt(__('none', 'swfput_l10n')));
-				foreach ( $aa as $fn => $fi ) {
-					$m = basename($fn);
-					if ( ! preg_match($mpat['av'], $m) )
-						continue;
-					$ts = $m . " (" . $fi . ")";
-					printf($sofmt, self::et($fi), self::ht($ts));
-				}
-				// end select
-				echo "</select><br />\n";
-				echo "</p>\n";
-			} // end if there are upload files
-		?>
-		<p>
-		<?php /* Remove MP3 audio (v. 1.0.8) $k = 'audio';
-			$l = self::wt(__('Medium is audio: ', 'swfput_l10n'));
-			printf($lbfmt, $id, $k, $l);
-			$ck = $$k == 'true' ? 'checked="checked" ' : '';
-			printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
-		</p><p>
-		<?php */ $k = 'altvideo'; 
-			$l = self::wt(__('HTML5 video URLs or media library IDs (.mp4, .webm, .ogv):', 'swfput_l10n'));
-			printf($lbfmt, $id, $k, $l);
-			printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
-		</p>
-		<?php
-			// if there are upload files, print <select >
-			$kl = $k;
-			if ( count($af) > 0 ) {
-				echo "<p>\n";
-				$k = 'h5files';
-				$jfcp = sprintf($jfap, $id, $k, $kl);
-				$l = self::wt(__('Select HTML5 video URL from uploads directory (appends):', 'swfput_l10n'));
-				printf($lbfmt, $id, $k, $l);
-				// <select>
-				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfcp);
-				// <options>
-				printf($sofmt, '', self::wt(__('none', 'swfput_l10n')));
-				foreach ( $af as $d => $e ) {
-					$hit = array();
-					for ( $i = 0; $i < count($e); $i++ )
-						if ( preg_match($mpat['h5av'], $e[$i]) )
-							$hit[] = &$af[$d][$i];
-					if ( empty($hit) )
-						continue;
-					printf($sgfmt, self::ht($d));
-					foreach ( $hit as $fv ) {
-						$tu = rtrim($ub, '/') . '/' . $d . '/' . $fv;
-						$fv = self::ht($fv);
-						printf($sofmt, self::et($tu), $fv);
-					}
-					echo "</optgroup>\n";
-				}
-				// end select
-				echo "</select><br />\n";
-				echo "</p>\n";
-			} // end if there are upload files
-			if ( ! empty($aa) ) {
-				echo "<p>\n";
-				$k = 'h5atch';
-				$jfcp = sprintf($jfap, $id, $k, $kl);
-				$l = self::wt(__('Select ID for HTML5 video from media library (appends):', 'swfput_l10n'));
-				printf($lbfmt, $id, $k, $l);
-				// <select>
-				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfcp);
-				// <options>
-				printf($sofmt, '', self::wt(__('none', 'swfput_l10n')));
-				foreach ( $aa as $fn => $fi ) {
-					$m = basename($fn);
-					if ( ! preg_match($mpat['h5av'], $m) )
-						continue;
-					$ts = $m . " (" . $fi . ")";
-					printf($sofmt, self::et($fi), self::ht($ts));
-				}
-				// end select
-				echo "</select><br />\n";
-				echo "</p>\n";
-			} // end if there are upload files
-		?>
-		<p>
-		<?php $k = 'playpath'; 
-			$l = self::wt(__('Playpath (rtmp):', 'swfput_l10n'));
-			printf($lbfmt, $id, $k, $l);
-			printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
-		</p><p>
-		<?php $k = 'iimage';
-			$l = self::wt(__('Url of initial image file (optional):', 'swfput_l10n'));
-			printf($lbfmt, $id, $k, $l);
-			printf($infmt, $iw, $id, $k, $id, $k, $$k); ?>
-		</p>
-		<?php
-			// if there are upload files, print <select >
-			$kl = $k;
-			if ( count($af) > 0 ) {
-				echo "<p>\n";
-				$k = 'ifiles';
-				$jfcp = sprintf($jfsl, $id, $k, $kl);
-				$l = self::wt(__('Load image from uploads directory:', 'swfput_l10n'));
-				printf($lbfmt, $id, $k, $l);
-				// <select>
-				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfcp);
-				// <options>
-				printf($sofmt, '', self::wt(__('none', 'swfput_l10n')));
-				foreach ( $af as $d => $e ) {
-					$hit = array();
-					for ( $i = 0; $i < count($e); $i++ )
-						if ( preg_match($mpat['i'], $e[$i]) )
-							$hit[] = &$af[$d][$i];
-					if ( empty($hit) )
-						continue;
-					printf($sgfmt, self::ht($d));
-					foreach ( $hit as $fv ) {
-						$tu = rtrim($ub, '/') . '/' . $d . '/' . $fv;
-						$fv = self::ht($fv);
-						printf($sofmt, self::et($tu), $fv);
-					}
-					echo "</optgroup>\n";
-				}
-				// end select
-				echo "</select><br />\n";
-				echo "</p>\n";
-			} // end if there are upload files
-			if ( ! empty($aa) ) {
-				echo "<p>\n";
-				$k = 'iatch';
-				$jfcp = sprintf($jfsl, $id, $k, $kl);
-				$l = self::wt(__('Load image ID from media library:', 'swfput_l10n'));
-				printf($lbfmt, $id, $k, $l);
-				// <select>
-				printf($slfmt, $id, $k, $id, $k, $iw, $job, $jfcp);
-				// <options>
-				printf($sofmt, '', self::wt(__('none', 'swfput_l10n')));
-				foreach ( $aa as $fn => $fi ) {
-					$m = basename($fn);
-					if ( ! preg_match($mpat['i'], $m) )
-						continue;
-					$ts = $m . " (" . $fi . ")";
-					printf($sofmt, self::et($fi), self::ht($ts));
-				}
-				// end select
-				echo "</select><br />\n";
-				echo "</p>\n";
-			} // end if there are upload files
-		?>
-		<p>
-		<?php $k = 'iimgbg';
-			$l = self::wt(__('Use initial image as no-video alternate: ', 'swfput_l10n'));
-			printf($lbfmt, $id, $k, $l);
-			$ck = $$k == 'true' ? 'checked="checked" ' : '';
-			printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
-		</p>
-
-		</div></div>
-		<?php $ndiv++;
-			$dvon = $dvio . $ndiv;
-			$dvin = $dvii . $ndiv;
-			$dvib = $dvin . '_btn';
-			$jdft = sprintf($jdsh, $dvin);
-		?>
-		<div class="<?php echo $dvio; ?>" id="<?php echo $dvon; ?>">
-		<span class="submit">
-			<?php printf($dbfmt, $dvib, $dbvhi, $job, $jdft); ?>
-		</span>
-		<h3 class="hndle"><span><?php
-			echo self::wt(__('Dimensions', 'swfput_l10n')); ?></span></h3>
-		<div class="<?php echo $dvii; ?>" id="<?php echo $dvin; ?>">
-
-		<?php $els = array(
-			array('width', '<p>', ' &#215; ', $in, 'inp',
-				__('Pixel Width: ', 'swfput_l10n')),
-			array('height', '', '</p>', $in, 'inp',
-				__('Height: ', 'swfput_l10n')),
-			array('mobiwidth', '<p>', '</p>', $in, 'inp',
-				__('Mobile width (0 disables): ', 'swfput_l10n')),
-			array('aspectautoadj', '<p>', '</p>', $in, 'chk',
-				__('Auto aspect (e.g. 360x240 to 4:3): ', 'swfput_l10n')),
-			array('displayaspect', '<p>', '</p>', $in, 'inp',
-				__('Display aspect (e.g. 4:3, precludes Auto): ', 'swfput_l10n')),
-			array('pixelaspect', '<p>', '</p>', $in, 'inp',
-				__('Pixel aspect (e.g. 8:9, precluded by Display): ', 'swfput_l10n'))
-			);
-			foreach ( $els as $el ) {
-				$k = $el[0];
-				echo $el[1];
-				$type = &$el[4];
-				$l = self::wt($el[5]);
-				printf($lbfmt, $id, $k, $l);
-				if ( $type == 'inp' ) {
-					printf($infmt, $el[3], $id, $k, $id, $k, $$k);
-				} else if ( $type == 'chk' ) {
-					$ck = $$k == 'true' ? 'checked="checked" ' : '';
-					printf($ckfmt, $id, $k, $id, $k, $$k, $ck);
-				}
-				echo $el[2];
-			}
-		?>
-
-		</div></div>
-		<?php $ndiv++;
-			$dvon = $dvio . $ndiv;
-			$dvin = $dvii . $ndiv;
-			$dvib = $dvin . '_btn';
-			$jdft = sprintf($jdsh, $dvin);
-		?>
-		<div class="<?php echo $dvio; ?>" id="<?php echo $dvon; ?>">
-		<span class="submit">
-			<?php printf($dbfmt, $dvib, $dbvhi, $job, $jdft); ?>
-		</span>
-		<h3 class="hndle"><span><?php
-			echo self::wt(__('Behavior', 'swfput_l10n')); ?></span></h3>
-		<div class="<?php echo $dvii; ?>" id="<?php echo $dvin; ?>">
-		
-		<?php $els = array(
-			array('volume', '<p>', '</p>', $in, 'inp',
-				__('Initial volume (0-100): ', 'swfput_l10n')),
-			array('play', '<p>', '</p>', $in, 'chk',
-				__('Play on load (else waits for play button): ', 'swfput_l10n')),
-			array('loop', '<p>', '</p>', $in, 'chk',
-				__('Loop play: ', 'swfput_l10n')),
-			array('hidebar', '<p>', '</p>', $in, 'chk',
-				__('Hide control bar initially: ', 'swfput_l10n')),
-			array('disablebar', '<p>', '</p>', $in, 'chk',
-				__('Hide and disable control bar: ', 'swfput_l10n')),
-			array('allowfull', '<p>', '</p>', $in, 'chk',
-				__('Allow full screen: ', 'swfput_l10n')),
-			array('barheight', '<p>', '</p>', $in, 'inp',
-				__('Control bar Height (30-60): ', 'swfput_l10n'))
-			);
-			foreach ( $els as $el ) {
-				$k = $el[0];
-				echo $el[1];
-				$type = &$el[4];
-				$l = self::wt($el[5]);
-				printf($lbfmt, $id, $k, $l);
-				if ( $type == 'inp' ) {
-					printf($infmt, $el[3], $id, $k, $id, $k, $$k);
-				} else if ( $type == 'chk' ) {
-					$ck = $$k == 'true' ? 'checked="checked" ' : '';
-					printf($ckfmt, $id, $k, $id, $k, $$k, $ck);
-				}
-				echo $el[2];
-			}
-		?>
-
-		</div></div>
-
-		<?php
+		// EH: 20.07.2014
+		// Form markup and code moved to file xed_form.php
+		require 'xed_form.php';
 	}
 
 	// wrap do_shortcode() to set a flag for the callback
@@ -2152,14 +1756,17 @@ class SWF_put_evh {
 
 		$dw = $w + 3;
 
-		// use no class, but do use deprecated align
-		$dv = 'align="center" style="width: '
+		// EH: 2.2
+		// use class widget, do not use deprecated align
+		$dv = 'class="widget align' 
+			. $pr->getvalue('align'). '" style="width: '
 			. $dw . 'px; max-width: 100%"';
 		$c = '';
 		// Note '!=' -- not '!=='
 		if ( $content != null ) {
 			$c = do_shortcode($content);
-			$c = '</p><p><span align="center">' . $c . '</span></p><p>';
+			$c = '</p><p><span class="caption">'
+				. $c . '</span></p><p>';
 		}
 
 		$ids = $this->get_div_ids($code);
@@ -2212,7 +1819,8 @@ class SWF_put_evh {
 		$dw = $w + 0;
 
 		// use class that WP uses for e.g. images
-		$dv = ' class="wp-caption aligncenter"';
+		$dv = ' class="wp-caption align'
+			. $pr->getvalue('align') . '"';
 		$dv .= ' style="width: '.$dw.'px; max-width: 100%"';
 		$c = '';
 		// Note '!=' -- not '!=='
@@ -2268,7 +1876,8 @@ class SWF_put_evh {
 					$em  = $this->get_player_elements($swf, $pr, $ids);
 
 					$dv = 'style="width: '.($w+0).'px; max-width: 100%"'
-						. ' class="wp-caption aligncenter"';
+						. ' class="wp-caption align'
+						. $pr->setvalue('align') . '"';
 					$code = 'swfput_div';
 					$s = $this->get_div($ids, $dv, '', $em) . $sep;
 					$out .= $s . $line . $sep;
@@ -2295,19 +1904,27 @@ class SWF_put_evh {
 	// $divids are returned from get_div_ids($base),
 	// $divatts are appended to <div> after id,
 	// $cap is caption within <div> below video, and
-	// $vidtags are the array returned by get_player_elements()
+	// $vidtags are the array returned by get_player_elements(),
+	// with key 'el'; caller may also add 'enter' and 'leave'
+	// to place markup after the opening and before the closing
+	// of the div
 	public function get_div($divids, $divatts, $cap, $vidtags) {
 		$opfx = self::evhv5vjsnpfx;
 
 		$dv = sprintf('id="%s" %s', $divids[0], $divatts);
 
 		return sprintf('
-			<div %s>%s%s
-			</div><!-- %s -->
+			<div %s>
+			%s%s%s
+			%s</div><!-- %s -->
 			<script type="text/javascript">
 				new %s_sizer("%s", "%s", "%s", "%s", false);
 			</script>',
-			$dv, $vidtags['el'], $cap, $divids[0],
+			$dv,
+			isset($vidtags['enter']) ? $vidtags['enter'] : '',
+			$vidtags['el'], $cap,
+			isset($vidtags['leave']) ? $vidtags['leave'] : '',
+			$divids[0],
 			$opfx, $divids[0], $divids[1], $divids[2], $divids[3]);
 	}
 
@@ -2499,8 +2116,14 @@ class SWF_put_evh {
 	public static function is_msie() {
 		static $is_so = null;
 		if ( $is_so === null ) {
-			$r = preg_match('/\bMSIE\b/', $_SERVER['HTTP_USER_AGENT']);
-			$is_so = $r ? true : false;
+			// Occasionally 'HTTP_USER_AGENT' is not set in $_SERVER,
+			// and if that is the case, just say yes.
+			if ( ! isset($_SERVER['HTTP_USER_AGENT']) ) {
+				$is_so = true;
+			} else {
+				$r = preg_match('/\bMSIE\b/', $_SERVER['HTTP_USER_AGENT']);
+				$is_so = $r ? true : false;
+			}
 		}
 		return $is_so;
 	}
@@ -2948,7 +2571,6 @@ class SWF_put_evh {
 			$fesc = 'urlencode';
 		}
 
-		
 		//$ut = $this->check_expand_video_url($url, $defaulturl);
 		$flurl = $ut = $this->check_expand_video_url($url, '');
 		if ( $ut === false ) {
@@ -3026,6 +2648,7 @@ class SWF_put_evh {
 				}
 			}
 		}
+
 		$iimgunesc = ''; // $iimage not escaped: see below
 		if ( $iimage !== '' ) {
 			$achk['rxpath'] = '/.*\.(swf|png|jpg|jpeg|gif)$/i';
@@ -3039,6 +2662,22 @@ class SWF_put_evh {
 			}
 			$iimage = ($esc == true) ? $fesc($ut) : $ut;
 		}
+
+		// prepare the preload attr: one special value 'image'
+		if ( ! isset($preload) ) {
+			$preload = $par->getdefault('preload');
+		}
+		switch ( $preload ) {
+			case 'none':
+			case 'metadata':
+			case 'auto':
+				break;
+			case 'image':
+			default:
+				$preload = ($iimgunesc == '') ? 'metadata' : 'none';
+				break;
+		}
+		
 		$playpath = ($esc == true) ? $fesc($playpath) : $playpath;
 		
 		// query vars
@@ -3048,8 +2687,8 @@ class SWF_put_evh {
 			$play, $hidebar, $volume, $loop, $disablebar);
 		$qv .= sprintf('&amp;AU=%s&amp;AA=%s&amp;DA=%s&amp;PA=%s',
 			$audio, $aspectautoadj, $displayaspect, $pixelaspect);
-		$qv .= sprintf('&amp;BH=%s',
-			$barheight);
+		$qv .= sprintf('&amp;BH=%s&amp;PLD=%s',
+			$barheight, $preload);
 
 		// if using the precompiled player the query vars should be
 		// written to 'flashvars' so that the player can access them;
@@ -3114,7 +2753,8 @@ class SWF_put_evh {
 			// vars for alternate h5 video
 			$aspect = $displayaspect;
 			$barwidth = $w;
-			$vstd = compact("play", "loop", "volume",
+			$vstd = compact(
+				"play", "loop", "volume", "preload",
 				"hidebar", "disablebar",
 				"aspectautoadj", "aspect",
 				"displayaspect", "pixelaspect",
@@ -3129,7 +2769,7 @@ class SWF_put_evh {
 				'id'        => $idav,
 				'poster'    => self::ht($iimgunesc),
 				'controls'  => 'true',
-				'preload'   => 'none',
+				'preload'   => $preload,
 				'autoplay'  => $play, // CHECK for h5v player
 				'loop'      => $loop,
 				'srcs'      => array(),
@@ -3150,7 +2790,8 @@ class SWF_put_evh {
 			// div added in 1.0.8 for new h5 video program
 			// TODO: move css classname to class-constant
 			$vd = "\n\t\t\t".'<div'.$vdid.' class="evhh5v_vidobjdiv">';
-			$vd .= "\n\t\t\t".'<video'.$viid.' controls preload="none"';
+			$vd .= "\n\t\t\t".'<video'.$viid.' controls';
+			$vd .= ' preload="' . $preload . '"';
 			// cannot use autoplay attr.: video will be played, even
 			// when <video> is placed as fallback content and flash is
 			// loaded in the primary <object>! In fact, fallback content
@@ -3453,7 +3094,11 @@ class SWF_params_evh {
 		'defaultplaypath' => '',
 		// <object>
 		'classid' => 'clsid:d27cdb6e-ae6d-11cf-96b8-444553540000',
-		'codebase' => 'http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0'
+		'codebase' => 'http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0',
+		// align, for alignment class in markup:
+		// left, center, right, none
+		'align' => 'center',
+		'preload' => 'image'
 	);
 
 	protected $inst = null; // modifiable copy per instance
@@ -3617,6 +3262,31 @@ class SWF_params_evh {
 					$i[$k] = $v;
 				}
 				break;
+			// strings with a set of valid values that can be checked
+			case 'align':
+				switch ( $t ) {
+					case 'left':
+					case 'right':
+					case 'center':
+					case 'none':
+						break;
+					default:
+						$i[$k] = $v;
+						break;
+				}
+				break;
+			case 'preload':
+				switch ( $t ) {
+					case 'none':
+					case 'metadata':
+					case 'auto':
+					case 'image':
+						break;
+					default:
+						$i[$k] = $v;
+						break;
+				}
+				break;
 			// varied complex strings; not sanitized here
 			case 'caption':
 			case 'url':
@@ -3650,7 +3320,7 @@ class SWF_put_widget_evh extends WP_Widget {
 	const swfput_plugin = 'SWF_put_evh';
 	// params helper class name
 	const swfput_params = 'SWF_params_evh';
-	// an instance of the main plugun class
+	// an instance of the main plugin class
 	protected $plinst;
 	
 	// default width should not be wider than sidebar, but
@@ -3727,11 +3397,13 @@ class SWF_put_widget_evh extends WP_Widget {
 
 		$cap = $this->plinst->wt($pr->getvalue('caption'));
 		$uswf = $this->plinst->get_swf_url();
+		// added 2.2: $pr->getvalue('align')
+		$aln = 'align' . $pr->getvalue('align');
 
-		$dw = $w + 3;
 		// overdue: 2.1 removed deprecated align
-		$dv = 'class="widget" style="width: '
-			. $dw . 'px; max-width: 100%"';
+		$dv = sprintf(
+			'class="widget %s" style="width: %upx; max-width: 100%%"',
+			$aln, $w);
 
 		extract($args);
 
@@ -3744,19 +3416,26 @@ class SWF_put_widget_evh extends WP_Widget {
 
 		echo $before_widget;
 
+		// 2.2: title is now assigned to $elem['enter'] (below) which
+		// places it just after opening of enclosing div in get_div()
+		// so, no more "echo $before_title . $title . $after_title;"
+		// but, before and after are still needed
 		if ( $title ) {
-			echo $before_title . $title . $after_title;
+			$title = $before_title . $title . $after_title;
 		}
 
 		if ( $cap ) {
-			// overdue: 2.1 removed deprecated align
-			$cap = '<p><span>' . $cap . '</span></p>';
+			$cap = '<p class="caption"><span class="caption-span">'
+				. $cap . '</span></p>';
 		}
 
+		// setup and print inner video div
 		$ids  = $this->plinst->get_div_ids('widget-div');
-		$em   = $this->plinst->get_player_elements($uswf, $pr, $ids);
-
-		printf('%s', $this->plinst->get_div($ids, $dv, $cap, $em));
+		$elem = $this->plinst->get_player_elements($uswf, $pr, $ids);
+		if ( $title ) {
+			$elem['enter'] = $title;
+		}
+		printf('%s', $this->plinst->get_div($ids, $dv, $cap, $elem));
 
 		echo $after_widget;
 	}
@@ -3800,462 +3479,17 @@ class SWF_put_widget_evh extends WP_Widget {
 		if ( ! $i['height'] ) {
 			$i['height'] = self::defheight;
 		}
+		if ( ! $i['align'] ) {
+			$i['align'] = $pr->getdefault('align');
+		}
 
 		return $i;
 	}
 
 	public function form($instance) {
-		$wt = 'wptexturize';  // display with char translations
-		// still being 5.2 compatible; anon funcs appeared in 5.3
-		//$ht = function($v) { return htmlentities($v, ENT_QUOTES, 'UTF-8'); };
-		$ht = 'swfput_php52_htmlent'; // just escape without char translations
-		// NOTE on encoding: do *not* use JS::unescape()!
-		// decodeURIComponent() should use the page charset (which
-		// still leaves room for error; this code assumes UTF-8 presently)
-		$et = 'rawurlencode'; // %XX -- for transfer
-
-		// make data instance
-		$pr = self::swfput_params;
-		$pr = new $pr(array('width' => self::defwidth,
-			'height' => self::defheight,
-			'mobiwidth' => '0')); // new in 1.0.7
-		$instance = wp_parse_args((array)$instance, $pr->getparams());
-
-		$val = '';
-		if ( array_key_exists('title', $instance) ) {
-			$val = $wt($instance['title']);
-		}
-		$id = $this->get_field_id('title');
-		$nm = $this->get_field_name('title');
-		$tl = $wt(__('Widget title:', 'swfput_l10n'));
-
-		// file select by ext pattern
-		$mpat = $this->plinst->get_mfilter_pat();
-		// files array from uploads dirs (empty if none)
-		$rhu = $this->plinst->r_find_uploads($mpat['m'], true);
-		$af = &$rhu['uploadfiles'];
-		$au = &$rhu['uploadsdir'];
-		$aa = &$rhu['medialib'];
-		// url base for upload dirs files
-		$ub = rtrim($au['baseurl'], '/') . '/';
-		// directory base for upload dirs files
-		$up = rtrim($au['basedir'], '/') . '/';
-		$slfmt =
-			'<select class="widefat" name="%s" id="%s" onchange="%s">';
-		$sgfmt = '<optgroup label="%s">' . "\n";
-		$sofmt = '<option value="%s">%s</option>' . "\n";
-		// expect jQuery to be loaded by WP
-		$jsfmt = "jQuery('[id=%s]').val";
-		// BAD
-		//$jsfmt .= '(unescape(this.options[selectedIndex].value))';
-		// better
-		$jsfmt .= '(decodeURIComponent(this.options[selectedIndex].value))';
-		$jsfmt .= ';return false;';
-
-		$jafmt = "var t=jQuery('[id=%s]'),t1=t.val(),t2=";
-		$jafmt .= 'decodeURIComponent(this.options[selectedIndex].value);';
-		$jafmt .= "t1+=(t1.length>0&&t2.length>0)?' | ':'';t.val(t1+t2);";
-		$jafmt .= 'return false;';
-
-		?>
-
-		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
-		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>"
-			type="text" value="<?php echo $val; ?>" /></p>
-
-		<?php
-		$val = $wt($instance['caption']);
-		$id = $this->get_field_id('caption');
-		$nm = $this->get_field_name('caption');
-		$tl = $wt(__('Caption:', 'swfput_l10n'));
-		?>
-		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
-		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>"
-			type="text" value="<?php echo $val; ?>" /></p>
-
-		<?php
-		$val = $instance['url'];
-		$id = $this->get_field_id('url');
-		$nm = $this->get_field_name('url');
-		$tl = $wt(__('Url or media library ID for flash video:', 'swfput_l10n'));
-		?>
-		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
-		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>"
-			type="text" value="<?php echo $val; ?>" /></p>
-
-		<?php // selects for URLs and attachment id's
-		// escape url field id for jQuery selector
-		$id = $this->plinst->esc_jqsel($id);
-		$js = sprintf($jsfmt, $id);
-		// optional print <select >
-		if ( count($af) > 0 ) {
-			$id = $this->get_field_id('files');
-			$k = $this->get_field_name('files');
-			$tl = $wt(__('Url for flash video from uploads directory:', 'swfput_l10n'));
-			printf('<p><label for="%s">%s</label>' . "\n", $id, $tl);
-			// <select>
-			printf($slfmt . "\n", $k, $id, $js);
-			// <options>
-			printf($sofmt, '', $wt(__('none', 'swfput_l10n')));
-			foreach ( $af as $d => $e ) {
-				$hit = array();
-				for ( $i = 0; $i < count($e); $i++ )
-					if ( preg_match($mpat['av'], $e[$i]) )
-						$hit[] = &$af[$d][$i];
-				if ( empty($hit) )
-					continue;
-				printf($sgfmt, $ht($d));
-				foreach ( $hit as $fv ) {
-					$tu = rtrim($ub, '/') . '/' . $d . '/' . $fv;
-					$fv = $ht($fv);
-					printf($sofmt, $et($tu), $fv);
-				}
-				echo "</optgroup>\n";
-			}
-			// end select
-			echo "</select></td></tr>\n";
-		} // end if there are upload files
-		if ( ! empty($aa) ) {
-			$id = $this->get_field_id('atch');
-			$k = $this->get_field_name('atch');
-			$tl = $wt(__('Select ID from media library for flash video:', 'swfput_l10n'));
-			printf('<p><label for="%s">%s</label>' . "\n", $id, $tl);
-			// <select>
-			printf($slfmt . "\n", $k, $id, $js);
-			// <options>
-			printf($sofmt, '', $wt(__('none', 'swfput_l10n')));
-			foreach ( $aa as $fn => $fi ) {
-				$m = basename($fn);
-				if ( ! preg_match($mpat['av'], $m) )
-					continue;
-				$ts = $m . " (" . $fi . ")";
-				printf($sofmt, $et($fi), $ht($ts));
-			}
-			// end select
-			echo "</select></td></tr>\n";
-		} // end if there are upload files
-		?>
-
-		<?php /*
-		// audio checkbox
-		$val = $instance['audio'];
-		$id = $this->get_field_id('audio');
-		$nm = $this->get_field_name('audio');
-		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
-		$tl = $wt(__('Medium is audio (e.g. *.mp3): ', 'swfput_l10n'));
-		?>
-		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
-		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>" style="width:16%;" type="checkbox"
-			value="<?php echo $val; ?>"<?php echo $ck; ?> /></p>
-
-		<?php */
-		$val = $instance['altvideo'];
-		$id = $this->get_field_id('altvideo');
-		$nm = $this->get_field_name('altvideo');
-		$tl = $wt(__('URLs for HTML5 video (.mp4, .webm, .ogv):', 'swfput_l10n'));
-		?>
-		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
-		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>"
-			type="text" value="<?php echo $val; ?>" /></p>
-
-		<?php // selects for URLs and attachment id's
-		// escape url field id for jQuery selector
-		$id = $this->plinst->esc_jqsel($id);
-		$js = sprintf($jafmt, $id);
-		// optional print <select >
-		if ( count($af) > 0 ) {
-			$id = $this->get_field_id('h5files');
-			$k = $this->get_field_name('h5files');
-			$tl = $wt(__('Url for HTML5 video from uploads directory (appends):', 'swfput_l10n'));
-			printf('<p><label for="%s">%s</label>' . "\n", $id, $tl);
-			// <select>
-			printf($slfmt . "\n", $k, $id, $js);
-			// <options>
-			printf($sofmt, '', $wt(__('none', 'swfput_l10n')));
-			foreach ( $af as $d => $e ) {
-				$hit = array();
-				for ( $i = 0; $i < count($e); $i++ )
-					if ( preg_match($mpat['h5av'], $e[$i]) )
-						$hit[] = &$af[$d][$i];
-				if ( empty($hit) )
-					continue;
-				printf($sgfmt, $ht($d));
-				foreach ( $hit as $fv ) {
-					$tu = rtrim($ub, '/') . '/' . $d . '/' . $fv;
-					$fv = $ht($fv);
-					printf($sofmt, $et($tu), $fv);
-				}
-				echo "</optgroup>\n";
-			}
-			// end select
-			echo "</select></td></tr>\n";
-		} // end if there are upload files
-		if ( ! empty($aa) ) {
-			$id = $this->get_field_id('h5atch');
-			$k = $this->get_field_name('h5atch');
-			$tl = $wt(__('Select ID from media library for HTML5 video (appends):', 'swfput_l10n'));
-			printf('<p><label for="%s">%s</label>' . "\n", $id, $tl);
-			// <select>
-			printf($slfmt . "\n", $k, $id, $js);
-			// <options>
-			printf($sofmt, '', $wt(__('none', 'swfput_l10n')));
-			foreach ( $aa as $fn => $fi ) {
-				$m = basename($fn);
-				if ( ! preg_match($mpat['h5av'], $m) )
-					continue;
-				$ts = $m . " (" . $fi . ")";
-				printf($sofmt, $et($fi), $ht($ts));
-			}
-			// end select
-			echo "</select></td></tr>\n";
-		} // end if there are upload files
-		?>
-
-		<?php
-		$val = $instance['playpath'];
-		$id = $this->get_field_id('playpath');
-		$nm = $this->get_field_name('playpath');
-		$tl = $wt(__('Playpath (rtmp) or co-video (mp3):', 'swfput_l10n'));
-		?>
-		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
-		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>"
-			type="text" value="<?php echo $val; ?>" /></p>
-
-		<?php
-		$val = $instance['iimage'];
-		$id = $this->get_field_id('iimage');
-		$nm = $this->get_field_name('iimage');
-		$tl = $wt(__('Url of initial image file (optional):', 'swfput_l10n'));
-		?>
-		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
-		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>"
-			type="text" value="<?php echo $val; ?>" /></p>
-
-		<?php // selects for URLs and attachment id's
-		// escape url field id for jQuery selector
-		$id = $this->plinst->esc_jqsel($id);
-		$js = sprintf($jsfmt, $id);
-		// optional print <select >
-		if ( count($af) > 0 ) {
-			$id = $this->get_field_id('ifiles');
-			$k = $this->get_field_name('ifiles');
-			$tl = $wt(__('Load image from uploads directory:', 'swfput_l10n'));
-			printf('<p><label for="%s">%s</label>' . "\n", $id, $tl);
-			// <select>
-			printf($slfmt . "\n", $k, $id, $js);
-			// <options>
-			printf($sofmt, '', $wt(__('none', 'swfput_l10n')));
-			foreach ( $af as $d => $e ) {
-				$hit = array();
-				for ( $i = 0; $i < count($e); $i++ )
-					if ( preg_match($mpat['i'], $e[$i]) )
-						$hit[] = &$af[$d][$i];
-				if ( empty($hit) )
-					continue;
-				printf($sgfmt, $ht($d));
-				foreach ( $hit as $fv ) {
-					$tu = rtrim($ub, '/') . '/' . $d . '/' . $fv;
-					$fv = $ht($fv);
-					printf($sofmt, $et($tu), $fv);
-				}
-				echo "</optgroup>\n";
-			}
-			// end select
-			echo "</select></td></tr>\n";
-		} // end if there are upload files
-		if ( ! empty($aa) ) {
-			$id = $this->get_field_id('iatch');
-			$k = $this->get_field_name('iatch');
-			$tl = $wt(__('Load image ID from media library:', 'swfput_l10n'));
-			printf('<p><label for="%s">%s</label>' . "\n", $id, $tl);
-			// <select>
-			printf($slfmt . "\n", $k, $id, $js);
-			// <options>
-			printf($sofmt, '', $wt(__('none', 'swfput_l10n')));
-			foreach ( $aa as $fn => $fi ) {
-				$m = basename($fn);
-				if ( ! preg_match($mpat['i'], $m) )
-					continue;
-				$ts = $m . " (" . $fi . ")";
-				printf($sofmt, $et($fi), $ht($ts));
-			}
-			// end select
-			echo "</select></td></tr>\n";
-		} // end if there are upload files
-		?>
-
-		<?php
-		// initial as 'bg', alternate checkbox
-		$val = $instance['iimgbg'];
-		$id = $this->get_field_id('iimgbg');
-		$nm = $this->get_field_name('iimgbg');
-		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
-		$tl = $wt(__('Use initial image as no-video alternate: ', 'swfput_l10n'));
-		?>
-		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
-		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>" style="width:16%;" type="checkbox"
-			value="<?php echo $val; ?>"<?php echo $ck; ?> /></p>
-
-		<?php
-		$val = $wt($instance['width']);
-		$id = $this->get_field_id('width');
-		$nm = $this->get_field_name('width');
-		$tl = sprintf(__('Width (default %u): ', 'swfput_l10n'), self::defwidth);
-		$tl = $wt($tl);
-		?>
-		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
-		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>" style="width:16%;"
-			type="text" value="<?php echo $val; ?>" /></p>
-
-		<?php
-		$val = $wt($instance['height']);
-		$id = $this->get_field_id('height');
-		$nm = $this->get_field_name('height');
-		$tl = sprintf(__('Height (default %u): ', 'swfput_l10n'), self::defheight);
-		$tl = $wt($tl);
-		?>
-		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
-		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>" style="width:16%;"
-			type="text" value="<?php echo $val; ?>" /></p>
-
-		<?php
-		$val = $wt($instance['mobiwidth']);
-		$id = $this->get_field_id('mobiwidth');
-		$nm = $this->get_field_name('mobiwidth');
-		$tl = $wt(__('Mobile width (0 disables) :', 'swfput_l10n'));
-		?>
-		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
-		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>" style="width:16%;"
-			type="text" value="<?php echo $val; ?>" /></p>
-
-		<?php
-		$val = $instance['aspectautoadj'];
-		$id = $this->get_field_id('aspectautoadj');
-		$nm = $this->get_field_name('aspectautoadj');
-		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
-		$tl = $wt(__('Auto aspect (e.g. 360x240 to 4:3): ', 'swfput_l10n'));
-		?>
-		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
-		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>" style="width:16%;" type="checkbox"
-			value="<?php echo $val; ?>"<?php echo $ck; ?> /></p>
-
-		<?php
-		$val = $instance['displayaspect'];
-		$id = $this->get_field_id('displayaspect');
-		$nm = $this->get_field_name('displayaspect');
-		$tl = $wt(__('Display aspect (e.g. 4:3, precludes Auto): ', 'swfput_l10n'));
-		?>
-		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
-		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>" style="width:16%;"
-			type="text" value="<?php echo $val; ?>" /></p>
-
-		<?php
-		$val = $instance['pixelaspect'];
-		$id = $this->get_field_id('pixelaspect');
-		$nm = $this->get_field_name('pixelaspect');
-		$tl = $wt(__('Pixel aspect (e.g. 8:9, precluded by Display): ', 'swfput_l10n'));
-		?>
-		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
-		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>" style="width:16%;"
-			type="text" value="<?php echo $val; ?>" /></p>
-
-		<?php
-		$val = $wt($instance['volume']);
-		$id = $this->get_field_id('volume');
-		$nm = $this->get_field_name('volume');
-		$tl = $wt(__('Initial volume (0-100): ', 'swfput_l10n'));
-		?>
-		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
-		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>" style="width:16%;"
-			type="text" value="<?php echo $val; ?>" /></p>
-
-		<?php
-		$val = $instance['play'];
-		$id = $this->get_field_id('play');
-		$nm = $this->get_field_name('play');
-		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
-		$tl = $wt(__('Play on load (else waits for play button): ', 'swfput_l10n'));
-		?>
-		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
-		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>" style="width:16%;" type="checkbox"
-			value="<?php echo $val; ?>"<?php echo $ck; ?> /></p>
-
-		<?php
-		$val = $instance['loop'];
-		$id = $this->get_field_id('loop');
-		$nm = $this->get_field_name('loop');
-		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
-		$tl = $wt(__('Loop play: ', 'swfput_l10n'));
-		?>
-		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
-		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>" style="width:16%;" type="checkbox"
-			value="<?php echo $val; ?>"<?php echo $ck; ?> /></p>
-
-		<?php
-		$val = $instance['hidebar'];
-		$id = $this->get_field_id('hidebar');
-		$nm = $this->get_field_name('hidebar');
-		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
-		$tl = $wt(__('Hide control bar initially: ', 'swfput_l10n'));
-		?>
-		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
-		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>" style="width:16%;" type="checkbox"
-			value="<?php echo $val; ?>"<?php echo $ck; ?> /></p>
-
-		<?php
-		$val = $instance['disablebar'];
-		$id = $this->get_field_id('disablebar');
-		$nm = $this->get_field_name('disablebar');
-		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
-		$tl = $wt(__('Hide and disable control bar: ', 'swfput_l10n'));
-		?>
-		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
-		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>" style="width:16%;" type="checkbox"
-			value="<?php echo $val; ?>"<?php echo $ck; ?> /></p>
-
-		<?php
-		$val = $instance['allowfull'];
-		$id = $this->get_field_id('allowfull');
-		$nm = $this->get_field_name('allowfull');
-		$ck = $val == 'true' ? ' checked="checked"' : ''; $val = 'true';
-		$tl = $wt(__('Allow full screen: ', 'swfput_l10n'));
-		?>
-		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
-		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>" style="width:16%;" type="checkbox"
-			value="<?php echo $val; ?>"<?php echo $ck; ?> /></p>
-
-		<?php
-		$val = $ht($instance['barheight']);
-		$id = $this->get_field_id('barheight');
-		$nm = $this->get_field_name('barheight');
-		$tl = $wt(__('Control bar Height (30-60): ', 'swfput_l10n'));
-		?>
-		<p><label for="<?php echo $id; ?>"><?php echo $tl; ?></label>
-		<input class="widefat" id="<?php echo $id; ?>"
-			name="<?php echo $nm; ?>" style="width:16%;"
-			type="text" value="<?php echo $val; ?>" /></p>
-
-		<?php
+		// EH: 20.07.2014
+		// code and markup moved into file xed_widget_form.php
+		require 'xed_widget_form.php';
 	}
 } // End class SWF_put_widget_evh
 else :

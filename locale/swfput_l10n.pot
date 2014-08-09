@@ -1,4 +1,4 @@
-# swfput 2.1.1 Pot Source
+# swfput 2.2.0 Pot Source
 # Copyright (C) 2013 Ed Hynan
 # This file is distributed under the same license as the swfput package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: swfput 2.1.1\n"
+"Project-Id-Version: swfput 2.2.0\n"
 "Report-Msgid-Bugs-To: edhynan@gmail.com\n"
-"POT-Creation-Date: 2014-05-03 16:48-0400\n"
+"POT-Creation-Date: 2014-08-09 07:49-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,75 +18,75 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: swfput.php:418
+#: swfput.php:416
 msgid "Show verbose introductions:"
 msgstr ""
 
-#: swfput.php:425
+#: swfput.php:423
 msgid "Dynamic SWF generation:"
 msgstr ""
 
-#: swfput.php:435
+#: swfput.php:433
 msgid "General Options"
 msgstr ""
 
-#: swfput.php:443
+#: swfput.php:441
 msgid "HTML5 video primary:"
 msgstr ""
 
-#: swfput.php:448
+#: swfput.php:446
 msgid "Place in posts:"
 msgstr ""
 
-#: swfput.php:453
+#: swfput.php:451
 msgid "Place in widget areas:"
 msgstr ""
 
-#: swfput.php:459
+#: swfput.php:457
 msgid "Video in post editor:"
 msgstr ""
 
-#: swfput.php:475
+#: swfput.php:473
 msgid "Video Placement Options"
 msgstr ""
 
-#: swfput.php:483
+#: swfput.php:481
 msgid "Use shortcodes in posts:"
 msgstr ""
 
-#: swfput.php:488
+#: swfput.php:486
 msgid "Search attachment links in posts:"
 msgstr ""
 
-#: swfput.php:497
+#: swfput.php:495
 msgid "Video In Posts"
 msgstr ""
 
-#: swfput.php:505
+#: swfput.php:503
 msgid "Use the included widget:"
 msgstr ""
 
-#: swfput.php:510
+#: swfput.php:508
 msgid "Use shortcodes in widgets:"
 msgstr ""
 
-#: swfput.php:519
+#: swfput.php:517
 msgid "Video In Widget Areas"
 msgstr ""
 
-#: swfput.php:528
+#: swfput.php:526
 msgid "When the plugin is uninstalled:"
 msgstr ""
 
-#: swfput.php:537
+#: swfput.php:535
 msgid "Plugin Install Settings"
 msgstr ""
 
-#: swfput.php:561
+#: swfput.php:559
 msgid "SWFPut Plugin"
 msgstr ""
 
-#: swfput.php:562
+#: swfput.php:560
 msgid "SWFPut Configuration"
 msgstr ""
 
@@ -94,20 +94,20 @@ msgstr ""
 #. capability = 'manage_options'
 #. callback
 #. 'hook_suffix' callback array
-#: swfput.php:568
+#: swfput.php:566
 msgid "SWFPut Plugin Configuration"
 msgstr ""
 
-#: swfput.php:569
+#: swfput.php:567
 msgid "Display and Runtime Settings."
 msgstr ""
 
-#: swfput.php:570 swfput.php:630
+#: swfput.php:568 swfput.php:628
 msgid "Save Settings"
 msgstr ""
 
 #. checkbox id will 'verbose_show-hide'
-#: swfput.php:583
+#: swfput.php:581
 msgid "Section introductions"
 msgstr ""
 
@@ -116,7 +116,7 @@ msgstr ""
 #. The quoted string "Screen Options" should match an
 #. interface label from the WP core, so if possible
 #. use the WP core translation for that (likewise "Help").
-#: swfput.php:611
+#: swfput.php:609
 #, possible-php-format
 msgid ""
 "<p>The sections of this page each have an\n"
@@ -139,11 +139,11 @@ msgid ""
 "\t\t\t</p>"
 msgstr ""
 
-#: swfput.php:629 swfput.php:1572
+#: swfput.php:627 swfput.php:1570
 msgid "Show verbose introductions"
 msgstr ""
 
-#: swfput.php:643
+#: swfput.php:641
 #, possible-php-format
 msgid ""
 "<p><strong>%s</strong></p><p>\n"
@@ -154,58 +154,58 @@ msgid ""
 "\t\t\t</p>"
 msgstr ""
 
-#: swfput.php:649
+#: swfput.php:647
 msgid "For more information:"
 msgstr ""
 
-#: swfput.php:664 swfput.php:686
+#: swfput.php:662 swfput.php:684
 msgid "Overview"
 msgstr ""
 
-#: swfput.php:674 swfput.php:687
+#: swfput.php:672 swfput.php:685
 msgid "Tips"
 msgstr ""
 
-#: swfput.php:724 swfput.php:861
+#: swfput.php:722 swfput.php:859
 msgid "SWFPut Video"
 msgstr ""
 
 #. Label shown on widgets page
-#: swfput.php:851 swfput.php:872 swfput.php:3676
+#: swfput.php:849 swfput.php:870 swfput.php:3346
 msgid "SWFPut Video Player"
 msgstr ""
 
-#: swfput.php:976
+#: swfput.php:974
 msgid "Settings"
 msgstr ""
 
-#: swfput.php:1194
+#: swfput.php:1192
 #, possible-php-format
 msgid "bad choice: \"%s\""
 msgstr ""
 
-#: swfput.php:1235
+#: swfput.php:1233
 #, possible-php-format
 msgid "bad key in option validation: \"%s\""
 msgstr ""
 
-#: swfput.php:1249
+#: swfput.php:1247
 msgid "Settings updated successfully"
 msgstr ""
 
-#: swfput.php:1250
+#: swfput.php:1248
 #, possible-php-format
 msgid "One (%d) setting updated"
 msgid_plural "Some settings (%d) updated"
 msgstr[0] ""
 msgstr[1] ""
 
-#: swfput.php:1282 swfput.php:1329 swfput.php:1414 swfput.php:1470
-#: swfput.php:1524
+#: swfput.php:1280 swfput.php:1327 swfput.php:1412 swfput.php:1468
+#: swfput.php:1522
 msgid "Introduction:"
 msgstr ""
 
-#: swfput.php:1285
+#: swfput.php:1283
 msgid ""
 "The verbose option selects whether\n"
 "\t\t\tverbose descriptions\n"
@@ -216,7 +216,7 @@ msgid ""
 "\t\t\tselected."
 msgstr ""
 
-#: swfput.php:1295
+#: swfput.php:1293
 msgid ""
 "The PHP+Ming option selects whether\n"
 "\t\t\t\tthe Flash player program is generated with PHP\n"
@@ -231,12 +231,12 @@ msgid ""
 "\t\t\t\tserver of your site."
 msgstr ""
 
-#: swfput.php:1316 swfput.php:1399 swfput.php:1455 swfput.php:1507
-#: swfput.php:1548
+#: swfput.php:1314 swfput.php:1397 swfput.php:1453 swfput.php:1505
+#: swfput.php:1546
 msgid "Go forward to save button."
 msgstr ""
 
-#: swfput.php:1331
+#: swfput.php:1329
 msgid ""
 "These options control video placement.\n"
 "\t\t\t</p><p>\n"
@@ -286,7 +286,7 @@ msgid ""
 "\t\t\t"
 msgstr ""
 
-#: swfput.php:1381
+#: swfput.php:1379
 msgid ""
 "\n"
 "\t\t\tThe \"Video in post editor\" multiple choice option\n"
@@ -297,11 +297,11 @@ msgid ""
 "\t\t\t"
 msgstr ""
 
-#: swfput.php:1401 swfput.php:1457 swfput.php:1509 swfput.php:1550
+#: swfput.php:1399 swfput.php:1455 swfput.php:1507 swfput.php:1548
 msgid "Go back to top (General section)."
 msgstr ""
 
-#: swfput.php:1417
+#: swfput.php:1415
 msgid ""
 "\n"
 "\t\t\t<strong>These options are deprecated and will be\n"
@@ -334,7 +334,7 @@ msgid ""
 "\t\t\tare not available for this method."
 msgstr ""
 
-#: swfput.php:1473
+#: swfput.php:1471
 msgid ""
 "\n"
 "\t\t\t<strong>These options are deprecated and will be\n"
@@ -362,11 +362,11 @@ msgid ""
 "\t\t\tpasted into the widget text, on a line of its own.)"
 msgstr ""
 
-#: swfput.php:1515
+#: swfput.php:1513
 msgid "Install options:"
 msgstr ""
 
-#: swfput.php:1527
+#: swfput.php:1525
 msgid ""
 "This section includes optional\n"
 "\t\t\tfeatures for plugin install or uninstall. Presently\n"
@@ -382,216 +382,60 @@ msgid ""
 "\t\t\toptions might be helpful."
 msgstr ""
 
-#: swfput.php:1589
+#: swfput.php:1587
 msgid "Use SWF script if PHP+Ming is available"
 msgstr ""
 
-#: swfput.php:1598
+#: swfput.php:1596
 msgid "The SWFPut editor plugin is not supported in this installation"
 msgstr ""
 
-#: swfput.php:1603
+#: swfput.php:1601
 msgid "When to display video in post editor"
 msgstr ""
 
-#: swfput.php:1607
+#: swfput.php:1605
 msgid "Always display video in the post editor"
 msgstr ""
 
-#: swfput.php:1608
+#: swfput.php:1606
 msgid "Only when the browser platform is not mobile"
 msgstr ""
 
-#: swfput.php:1609
+#: swfput.php:1607
 msgid "Never display video in the post editor"
 msgstr ""
 
-#: swfput.php:1643
+#: swfput.php:1641
 msgid "Enable widget or shortcode"
 msgstr ""
 
-#: swfput.php:1650
+#: swfput.php:1648
 msgid "Place HTML5 video as primary content"
 msgstr ""
 
-#: swfput.php:1657
+#: swfput.php:1655
 msgid "Enable shortcode or attachment search"
 msgstr ""
 
-#: swfput.php:1664
+#: swfput.php:1662
 msgid "Search attachments in posts"
 msgstr ""
 
-#: swfput.php:1671
+#: swfput.php:1669
 msgid "Enable the included widget"
 msgstr ""
 
-#: swfput.php:1678
+#: swfput.php:1676
 msgid "Enable shortcodes in widgets"
 msgstr ""
 
-#: swfput.php:1685
+#: swfput.php:1683
 msgid "Enable shortcode in posts"
 msgstr ""
 
-#: swfput.php:1692
+#: swfput.php:1690
 msgid "Permanently delete settings (clean db)"
-msgstr ""
-
-#. button values for sliding divs
-#: swfput.php:1760
-msgid "Hide"
-msgstr ""
-
-#: swfput.php:1761
-msgid "Show"
-msgstr ""
-
-#: swfput.php:1774
-msgid "Fill from post"
-msgstr ""
-
-#: swfput.php:1776
-msgid "Replace current in post"
-msgstr ""
-
-#: swfput.php:1778
-msgid "Delete current in post"
-msgstr ""
-
-#: swfput.php:1780
-msgid "Place new in post"
-msgstr ""
-
-#: swfput.php:1782
-msgid "Reset defaults"
-msgstr ""
-
-#: swfput.php:1799
-msgid "Media"
-msgstr ""
-
-#: swfput.php:1804 swfput.php:3871
-msgid "Caption:"
-msgstr ""
-
-#: swfput.php:1809
-msgid "Flash video URL or media library ID (.flv or .mp4):"
-msgstr ""
-
-#: swfput.php:1820
-msgid "Select flash video URL from uploads directory:"
-msgstr ""
-
-#. <options>
-#: swfput.php:1825 swfput.php:1854 swfput.php:1891 swfput.php:1920
-#: swfput.php:1956 swfput.php:1985 swfput.php:3902 swfput.php:3929
-#: swfput.php:3979 swfput.php:4006 swfput.php:4054 swfput.php:4081
-msgid "none"
-msgstr ""
-
-#: swfput.php:1849
-msgid "Select ID for flash video from media library:"
-msgstr ""
-
-#. end if there are upload files
-#. Remove MP3 audio (v. 1.0.8) $k = 'audio';
-#. $l = self::wt(__('Medium is audio: ', 'swfput_l10n'));
-#. printf($lbfmt, $id, $k, $l);
-#. $ck = $$k == 'true' ? 'checked="checked" ' : '';
-#. printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
-#. </p><p>
-#. <?php
-#: swfput.php:1875
-msgid "HTML5 video URLs or media library IDs (.mp4, .webm, .ogv):"
-msgstr ""
-
-#: swfput.php:1886
-msgid "Select HTML5 video URL from uploads directory (appends):"
-msgstr ""
-
-#: swfput.php:1915
-msgid "Select ID for HTML5 video from media library (appends):"
-msgstr ""
-
-#: swfput.php:1935
-msgid "Playpath (rtmp):"
-msgstr ""
-
-#: swfput.php:1940 swfput.php:4034
-msgid "Url of initial image file (optional):"
-msgstr ""
-
-#: swfput.php:1951 swfput.php:4049
-msgid "Load image from uploads directory:"
-msgstr ""
-
-#: swfput.php:1980 swfput.php:4076
-msgid "Load image ID from media library:"
-msgstr ""
-
-#: swfput.php:2000 swfput.php:4100
-msgid "Use initial image as no-video alternate: "
-msgstr ""
-
-#: swfput.php:2018
-msgid "Dimensions"
-msgstr ""
-
-#: swfput.php:2023
-msgid "Pixel Width: "
-msgstr ""
-
-#: swfput.php:2025
-msgid "Height: "
-msgstr ""
-
-#: swfput.php:2027
-msgid "Mobile width (0 disables): "
-msgstr ""
-
-#: swfput.php:2029 swfput.php:4147
-msgid "Auto aspect (e.g. 360x240 to 4:3): "
-msgstr ""
-
-#: swfput.php:2031 swfput.php:4158
-msgid "Display aspect (e.g. 4:3, precludes Auto): "
-msgstr ""
-
-#: swfput.php:2033 swfput.php:4169
-msgid "Pixel aspect (e.g. 8:9, precluded by Display): "
-msgstr ""
-
-#: swfput.php:2063
-msgid "Behavior"
-msgstr ""
-
-#: swfput.php:2068 swfput.php:4180
-msgid "Initial volume (0-100): "
-msgstr ""
-
-#: swfput.php:2070 swfput.php:4192
-msgid "Play on load (else waits for play button): "
-msgstr ""
-
-#: swfput.php:2072 swfput.php:4204
-msgid "Loop play: "
-msgstr ""
-
-#: swfput.php:2074 swfput.php:4216
-msgid "Hide control bar initially: "
-msgstr ""
-
-#: swfput.php:2076 swfput.php:4228
-msgid "Hide and disable control bar: "
-msgstr ""
-
-#: swfput.php:2078 swfput.php:4240
-msgid "Allow full screen: "
-msgstr ""
-
-#: swfput.php:2080 swfput.php:4251
-msgid "Control bar Height (30-60): "
 msgstr ""
 
 #. TRANSLATORS the '[]' are meant to indicate strongly
@@ -612,80 +456,34 @@ msgstr ""
 #. '%s' is any caption provided for a/v, if any,
 #. prepended with ASCII space ' '; '%s' is an empty string
 #. if there is no caption
-#: swfput.php:2129 swfput.php:2188
+#: swfput.php:1733 swfput.php:1795
 #, possible-php-format
 msgid " [A/V content \"%s\" disabled] "
 msgstr ""
 
-#: swfput.php:3083
+#: swfput.php:2722
 msgid "Video playback is not available"
 msgstr ""
 
-#: swfput.php:3242
+#: swfput.php:2883
 msgid "Video playback is not available."
 msgstr ""
 
 #. TRANSLATORS perl-type regular expression
 #. that matches a 'yes'
-#: swfput.php:3574
+#: swfput.php:3219
 msgid "/^?y(e((s|ah)!?)?)?$/i"
 msgstr ""
 
 #. TRANSLATORS perl-type regular expression
 #. that matches a 'no'
-#: swfput.php:3577
+#: swfput.php:3222
 msgid "/^n(o!?)?)?$/i"
 msgstr ""
 
 #. Description shown under label shown on widgets page
-#: swfput.php:3678
+#: swfput.php:3348
 msgid "Flash and HTML5 video for your widget areas"
-msgstr ""
-
-#: swfput.php:3830
-msgid "Widget title:"
-msgstr ""
-
-#: swfput.php:3882
-msgid "Url or media library ID for flash video:"
-msgstr ""
-
-#: swfput.php:3897
-msgid "Url for flash video from uploads directory:"
-msgstr ""
-
-#: swfput.php:3924
-msgid "Select ID from media library for flash video:"
-msgstr ""
-
-#: swfput.php:3959
-msgid "URLs for HTML5 video (.mp4, .webm, .ogv):"
-msgstr ""
-
-#: swfput.php:3974
-msgid "Url for HTML5 video from uploads directory (appends):"
-msgstr ""
-
-#: swfput.php:4001
-msgid "Select ID from media library for HTML5 video (appends):"
-msgstr ""
-
-#: swfput.php:4023
-msgid "Playpath (rtmp) or co-video (mp3):"
-msgstr ""
-
-#: swfput.php:4111
-#, possible-php-format
-msgid "Width (default %u): "
-msgstr ""
-
-#: swfput.php:4123
-#, possible-php-format
-msgid "Height (default %u): "
-msgstr ""
-
-#: swfput.php:4135
-msgid "Mobile width (0 disables) :"
 msgstr ""
 
 #: help_txt.php:40
@@ -826,5 +624,286 @@ msgid ""
 "\tThe default value for this field, 0,\n"
 "\tdisables this feature, and it has no effect if\n"
 "\ta mobile browser is not detected.\n"
+"\t</p><p>\n"
+"\t<h3>Video preload</h3>\n"
+"\tThis \"radio\" type option is in the <b>Behavior</b> section\n"
+"\tof the form. HTML5 video allows a \"preload\" attribute\n"
+"\twith a value of \"none\" or \"metadata\" or \"auto.\" This\n"
+"\toption provides those three values and one special selection:\n"
+"\t\"per initial image.\" This special selection will use\n"
+"\t\"none\" if an \"initial image file\" is set (in the <b>Media</b>\n"
+"\tsection of the form), or \"metadata\" if an initial\n"
+"\timage, or <i>poster</i>, is not set.\n"
+"\t</p><p>\n"
+"\tThe \"metadata\" selection tells the browser that it\n"
+"\tmay fetch a small part of the video file that\n"
+"\tincludes information such as dimensions, duration,\n"
+"\tcodec types.\n"
+"\tThis can be useful because with\n"
+"\tit a browser might also receive some of the video\n"
+"\tframes, and so it may display one frame as a 'poster.'\n"
+"\t(Whether a\n"
+"\tframe displayed this way is suitable is not certain.)\n"
+"\t</p><p>\n"
+"\tIf \"none\" is selected the browser will not fetch\n"
+"\tany of the video until it is played, and so without\n"
+"\tan initial image, the video region on the page will\n"
+"\tbe solid black until played.\n"
+"\t</p><p>\n"
+"\tThe \"auto\" selection should be avoided unless you\n"
+"\tknow what it does and that you need it. This is\n"
+"\tbecause with \"auto\" the browser may choose to\n"
+"\tfetch the entire video even before the visitor\n"
+"\tactively plays the video. Video files can be\n"
+"\tquite large, and a large unsolicited download\n"
+"\tmight be unkind to your site's visitors; it\n"
+"\tmight even cause a visitor additional charges\n"
+"\tdepending on their connection service. Also\n"
+"\tconsider your server and network load.\n"
+"\t</p><p>\n"
+"\tThe flash player does not have similar attributes,\n"
+"\tbut will behave similarly with regard to an\n"
+"\tinitial image: if one was not set, and the\n"
+"\tpreload option is not \"none,\" then the player\n"
+"\twill start playback and let it advance for a\n"
+"\tsmall random period, and then pause playback,\n"
+"\tleaving a visible frame to act as a 'poster.'\n"
 "\t</p>"
+msgstr ""
+
+#. button values for sliding divs
+#: xed_form.php:92
+msgid "Hide"
+msgstr ""
+
+#: xed_form.php:93
+msgid "Show"
+msgstr ""
+
+#: xed_form.php:106
+msgid "Fill from post"
+msgstr ""
+
+#: xed_form.php:108
+msgid "Replace current in post"
+msgstr ""
+
+#: xed_form.php:110
+msgid "Delete current in post"
+msgstr ""
+
+#: xed_form.php:112
+msgid "Place new in post"
+msgstr ""
+
+#: xed_form.php:114
+msgid "Reset defaults"
+msgstr ""
+
+#: xed_form.php:131
+msgid "Media"
+msgstr ""
+
+#: xed_form.php:136 xed_widget_form.php:98
+msgid "Caption:"
+msgstr ""
+
+#: xed_form.php:141
+msgid "Flash video URL or media library ID (.flv or .mp4):"
+msgstr ""
+
+#: xed_form.php:152
+msgid "Select flash video URL from uploads directory:"
+msgstr ""
+
+#. <options>
+#: xed_form.php:157 xed_form.php:186 xed_form.php:223 xed_form.php:252
+#: xed_form.php:288 xed_form.php:317 xed_form.php:407 xed_form.php:426
+#: xed_widget_form.php:129 xed_widget_form.php:156
+#: xed_widget_form.php:206 xed_widget_form.php:233
+#: xed_widget_form.php:281 xed_widget_form.php:308
+#: xed_widget_form.php:412 xed_widget_form.php:433
+msgid "none"
+msgstr ""
+
+#: xed_form.php:181
+msgid "Select ID for flash video from media library:"
+msgstr ""
+
+#. end if there are upload files
+#. Remove MP3 audio (v. 1.0.8) $k = 'audio';
+#. $l = self::wt(__('Medium is audio: ', 'swfput_l10n'));
+#. printf($lbfmt, $id, $k, $l);
+#. $ck = $$k == 'true' ? 'checked="checked" ' : '';
+#. printf($ckfmt, $id, $k, $id, $k, $$k, $ck); ?>
+#. </p><p>
+#. <?php
+#: xed_form.php:207
+msgid "HTML5 video URLs or media library IDs (.mp4, .webm, .ogv):"
+msgstr ""
+
+#: xed_form.php:218
+msgid "Select HTML5 video URL from uploads directory (appends):"
+msgstr ""
+
+#: xed_form.php:247
+msgid "Select ID for HTML5 video from media library (appends):"
+msgstr ""
+
+#: xed_form.php:267
+msgid "Playpath (rtmp):"
+msgstr ""
+
+#: xed_form.php:272 xed_widget_form.php:261
+msgid "Url of initial image file (optional):"
+msgstr ""
+
+#: xed_form.php:283 xed_widget_form.php:276
+msgid "Load image from uploads directory:"
+msgstr ""
+
+#: xed_form.php:312 xed_widget_form.php:303
+msgid "Load image ID from media library:"
+msgstr ""
+
+#: xed_form.php:332 xed_widget_form.php:327
+msgid "Use initial image as no-video alternate: "
+msgstr ""
+
+#: xed_form.php:350
+msgid "Dimensions"
+msgstr ""
+
+#: xed_form.php:355
+msgid "Pixel Width: "
+msgstr ""
+
+#: xed_form.php:357
+msgid "Height: "
+msgstr ""
+
+#: xed_form.php:359
+msgid "Mobile width (0 disables): "
+msgstr ""
+
+#: xed_form.php:361 xed_widget_form.php:374
+msgid "Auto aspect (e.g. 360x240 to 4:3): "
+msgstr ""
+
+#: xed_form.php:363 xed_widget_form.php:385
+msgid "Display aspect (e.g. 4:3, precludes Auto): "
+msgstr ""
+
+#: xed_form.php:365 xed_widget_form.php:396
+msgid "Pixel aspect (e.g. 8:9, precluded by Display): "
+msgstr ""
+
+#: xed_form.php:395
+msgid "Behavior"
+msgstr ""
+
+#: xed_form.php:402 xed_widget_form.php:407
+msgid "Alignment (in page or post): "
+msgstr ""
+
+#: xed_form.php:404 xed_widget_form.php:409
+msgid "left"
+msgstr ""
+
+#: xed_form.php:405 xed_widget_form.php:410
+msgid "center"
+msgstr ""
+
+#: xed_form.php:406 xed_widget_form.php:411
+msgid "right"
+msgstr ""
+
+#: xed_form.php:424 xed_widget_form.php:431
+msgid "Video preload: "
+msgstr ""
+
+#: xed_form.php:427 xed_widget_form.php:434
+msgid "metadata"
+msgstr ""
+
+#: xed_form.php:428 xed_widget_form.php:435
+msgid "auto"
+msgstr ""
+
+#: xed_form.php:429 xed_widget_form.php:436
+msgid "per initial image: \"none\" or \"preload\""
+msgstr ""
+
+#: xed_form.php:444 xed_widget_form.php:455
+msgid "Initial volume (0-100): "
+msgstr ""
+
+#: xed_form.php:446 xed_widget_form.php:467
+msgid "Play on load (else waits for play button): "
+msgstr ""
+
+#: xed_form.php:448 xed_widget_form.php:479
+msgid "Loop play: "
+msgstr ""
+
+#: xed_form.php:450 xed_widget_form.php:491
+msgid "Hide control bar initially: "
+msgstr ""
+
+#: xed_form.php:452 xed_widget_form.php:503
+msgid "Hide and disable control bar: "
+msgstr ""
+
+#: xed_form.php:454 xed_widget_form.php:515
+msgid "Allow full screen: "
+msgstr ""
+
+#: xed_form.php:456 xed_widget_form.php:526
+msgid "Control bar Height (30-60): "
+msgstr ""
+
+#: xed_widget_form.php:57
+msgid "Widget title:"
+msgstr ""
+
+#: xed_widget_form.php:109
+msgid "Url or media library ID for flash video:"
+msgstr ""
+
+#: xed_widget_form.php:124
+msgid "Url for flash video from uploads directory:"
+msgstr ""
+
+#: xed_widget_form.php:151
+msgid "Select ID from media library for flash video:"
+msgstr ""
+
+#: xed_widget_form.php:186
+msgid "URLs for HTML5 video (.mp4, .webm, .ogv):"
+msgstr ""
+
+#: xed_widget_form.php:201
+msgid "Url for HTML5 video from uploads directory (appends):"
+msgstr ""
+
+#: xed_widget_form.php:228
+msgid "Select ID from media library for HTML5 video (appends):"
+msgstr ""
+
+#: xed_widget_form.php:250
+msgid "Playpath (rtmp) or co-video (mp3):"
+msgstr ""
+
+#: xed_widget_form.php:338
+#, possible-php-format
+msgid "Width (default %u): "
+msgstr ""
+
+#: xed_widget_form.php:350
+#, possible-php-format
+msgid "Height (default %u): "
+msgstr ""
+
+#: xed_widget_form.php:362
+msgid "Mobile width (0 disables) :"
 msgstr ""

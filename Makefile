@@ -1,7 +1,7 @@
 #! /usr/bin/make -f
 # License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
 
-PRJVERS = 2.1.1
+PRJVERS = 2.2.0
 PRJSTEM = swfput
 PRJNAME = $(PRJSTEM)-$(PRJVERS)
 
@@ -11,6 +11,8 @@ TRANS_BUGS_EMAIL = edhynan@gmail.com
 
 SRCS = ${PRJSTEM}.php \
 	help_txt.php \
+	xed_form.php \
+	xed_widget_form.php \
 	Options_0_0_2b.inc.php \
 	OptField_0_0_2b.inc.php \
 	OptSection_0_0_2b.inc.php \
@@ -21,7 +23,8 @@ SRCS = ${PRJSTEM}.php \
 
 # The Opt*.php are support classes, not tied to this plugin,
 # so they do not share the text-domain and are not args to xgettext
-POTSRCS = ${PRJSTEM}.php help_txt.php mce_ifm.php
+POTSRCS = ${PRJSTEM}.php help_txt.php \
+	xed_form.php xed_widget_form.php mce_ifm.php
 
 DOCSD = docs
 JSDIR = js

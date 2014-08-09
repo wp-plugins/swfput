@@ -108,7 +108,9 @@ SWFPut_putswf_video_xed.prototype = {
 		playpath: "",
 		altvideo: "",
 		classid: "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000",
-		codebase: "http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0"
+		codebase: "http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0",
+		align: "center",
+		preload: "image"
 	},
 	ltrim : function(s, ch) {
 		var c = (ch === undefined) ? " " : ch;
@@ -217,6 +219,31 @@ SWFPut_putswf_video_xed.prototype = {
 					this['map'][k] = m[1] + ':' + m[2];
 				} else {
 					this['map'][k] = v;
+				}
+				break;
+			// strings with a set of valid values that can be checked
+			case 'align':
+				switch ( t ) {
+					case 'left':
+					case 'right':
+					case 'center':
+					case 'none':
+						break;
+					default:
+						this['map'][k] = v;
+						break;
+				}
+				break;
+			case 'preload':
+				switch ( t ) {
+					case 'none':
+					case 'metadata':
+					case 'auto':
+					case 'image':
+						break;
+					default:
+						this['map'][k] = v;
+						break;
 				}
 				break;
 			// varied complex strings; not sanitized here
@@ -681,6 +708,11 @@ SWFPut_putswf_video_xed.prototype = {
 					v = '';
 				}
 				$this['map'][k] = v;
+			} else if ( this.type == "radio" ) {
+				if ( this.checked !== undefined && this.checked ) {
+					v = this.value;
+					$this['map'][k] = v;
+				}
 			}
 		});
 		this.sanitize();
@@ -714,6 +746,10 @@ SWFPut_putswf_video_xed.prototype = {
 						v = '';
 						this.value = v;
 					}
+				} else if ( this.type == "radio" && this.value == v ) {
+					this.checked = 'checked';
+				} else if ( this.type == "radio" ) {
+					this.checked = '';
 				}
 			}
 		});

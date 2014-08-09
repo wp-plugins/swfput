@@ -341,53 +341,53 @@
 
          3.2.2.  Dimensions
 
-         o    Pixel  Width  x  Height:  set these to the desired
+         o    Pixel  Width  x  Height:  Set these to the desired
               size of the video player's embedded window.   This
               does  not  need to be the same as the display size
               of the video to be played, but the appearance will
               be  best  if the aspect of the player's display is
               the same as the display aspect of the  video.  For
-              example,  if  set  for  a  video  with  a  size of
-              400x300, then setting these to fields  to  320x240
-              would  look  good  (the  width:height ratio is the
-              same). In any case,  the  player  will  scale  the
-              video  to fit within its display, but it maintains
-              the aspect ratio, so horizontal or vertical  black
-              (unused)  areas  will  be  visible  if  the aspect
-              ratios do not match.   These  dimensions  are  not
-              fixed unless scripts are disabled. Where scripting
-              is available, the video display area is resized in
+              example, with a video of a size of 400x300 setting
+              these to fields to 320x240 would look good, as the
+              width:height ratios are the same.
+
+              The  player will scale the video to fit within its
+              display, but it maintains  the  aspect  ratio,  so
+              horizontal  or  vertical black (unused) areas will
+              be visible if the aspect ratios do not match.
+
+              These dimensions are not fixed unless scripts  are
+              disabled  in  the  browser.   Where  scripting  is
+              available, the video display area  is  resized  in
               concert  with  changes that the browser applies to
               the surrounding  elements.  This  is  particularly
               important  on  mobile platforms, where the browser
               will probably make extreme  size  adjustments  for
-              the small display size (This behavior might depend
-              on the current theme).
+              the  small display size.  This "responsive" behav-
+              ior will depend on the current theme being respon-
+              sive.
 
-         o    Mobile width: This is to provide a  width  to  use
-              only  if  a mobile browser is detected; the height
-              is automatically proportional,  according  to  the
-              regular   "Pixel   Width   x   Height"  dimensions
-              described above. This might be  used  for  widgets
-              placed  on  the sidebar, because the sidebar might
-              be placed below, rather than beside, the main con-
-              tent.  In this case more space might be available,
-              and larger display might be suitable. This feature
-              is  disabled  with  a  value  of '0,' which is the
-              default, and has no effect if the browser  is  not
-              identified as being on a mobile platform.
+         o    Mobile  width:  This  is to provide a width to use
+              only if a mobile browser is detected;  the  height
+              is  automatically  proportional,  according to the
+              regular  "Pixel   Width   x   Height"   dimensions
+              described above.
+
+              This  might be most useful for widgets placed on a
+              `sidebar,'  because  a  sidebar  might  be  placed
+              below,  rather  than  beside, the main content. In
+              this case more effective display  width  might  be
+              available,  and a wider display might be suitable.
+              This feature is disabled  with  a  value  of  '0,'
+              which  is  the  default,  and has no effect if the
+              browser provides a user agent string not known  as
+              a mobile platform.
 
          o    Auto  aspect:  This  enables a feature meant to be
               helpful when the video to  be  played  might  have
               been prepared as DVD-Video (NTSC or PAL) for stan-
               dard (non-widescreen) 4:3 display. Such video  has
               non-square  pixels;  i.e., its actual widthxheight
-              does not match its intended display  aspect.  With
-              this  check  enabled,  the video player will force
-              display at 4:3 ratio if the video dimensions match
-              one  of  the  DVD-Video  pixel  sizes. This is not
-              suitable for widescreen DVD-Video, which  has  one
-              of  the  expected  DVD-Video  pixel  sizes, but is
 
 
 
@@ -400,6 +400,12 @@
                                  -7-
 
 
+              does not match its intended display  aspect.  With
+              this  check  enabled,  the video player will force
+              display at 4:3 ratio if the video dimensions match
+              one  of  the  DVD-Video  pixel  sizes. This is not
+              suitable for widescreen DVD-Video, which  has  one
+              of  the  expected  DVD-Video  pixel  sizes, but is
               meant to be displayed with a 16:9 aspect.
 
          o    Display aspect: Set the  intended  display  aspect
@@ -424,36 +430,30 @@
 
          3.2.3.  Behavior
 
-         o    Initial volume: The video player has a volume con-
-              trol that visitors can adjust, but this field will
-              set a default volume. If  the  web  browser  flash
-              plugin  is  permitted  to save values locally on a
-              visitor's machine, then their adjustment  will  be
-              saved,  and  will  be used rather than the default
-              when they visit again (or reload the  page).  User
-              settings  are not saved for the HTML5 video player
-              presently.
+         o    Alignment: This is  an  exclusive  selection  with
+              options  `left,'  `center,'  `right,'  and `none.'
+              The default is center.  This option will  set  the
+              alignment  of the video display within the page or
+              post by adding a CSS class called one of  `.align-
+              left,'  `.aligncenter,' `.alignright,' or `.align-
+              none.'  A WordPress theme should provide CSS defi-
+              nitions  for the first three of those classes. The
+              fourth, .alignnone, is meant to use the  alignment
+              that  the video markup inherits, whatever it might
+              be.  (If there is a CSS definition for  .alignnone
+              hopefully it will have a sensible effect.)
 
-         o    Play on load: This will cause the video  to  begin
-              playing  as  soon as the player program is loaded.
-              When this is not set, the  player  waits  for  the
-              play button. (Above, it was stated that if script-
-              ing is not available, HTML5 video would  have  the
-              default  appearance  and  behavior provided by the
-              web browser. This play on load option will not  be
-              in  effect  in  that case, because while the video
-              element can take an autoplay attribute, that  can-
-              not work the scripted HTML5 player.)
+              Because  this  option  works  with  classes, which
+              depend on CSS definitions, it  is  ultimately  the
+              user's  WordPress theme that provide the effect of
+              this option.  For example, if a theme  provides  a
+              left or right margin for the `.widget' class, then
+              this plugin's video widget might not align accord-
+              ing to this option.
 
-         o    Loop  play:  This  will  cause  the medium to play
-              again from the beginning each time it ends.   When
-              this  is  not  set, the video plays once, and then
-              pauses.
 
-         o    Hide control bar initially: This  will  cause  the
-              control bar to hide a few seconds after the player
-              loads (e.g., so that it does not obscure  an  ini-
-              tial  image).  Note  that  this  also  changes the
+
+
 
 
 
@@ -466,58 +466,190 @@
                                  -8-
 
 
-              control bar behavior in general: the bar will show
+         o    Video  preload:  This  is  an exclusive selection.
+              HTML5 video allows a "preload"  attribute  with  a
+              value  of  "none"  or  "metadata"  or "auto." This
+              option provides those three values and one special
+              selection:   "per  initial  image."  This  special
+              selection will use "none"  if  an  "initial  image
+              file"  is  set (in the Media section of the form),
+              or "metadata" if an initial image, or  poster,  is
+              not set.
+
+              The  "metadata"  selection  allows  the browser to
+              fetch a small part of the video file with informa-
+              tion  such  as video dimensions, duration, and the
+              codec  types2.   This  can  be  useful  because  a
+              browser  might  also  receive  some  of  the video
+              frames, and so it  may  display  one  frame  as  a
+              `poster.'   (Whether a frame displayed this way is
+              suitable is not certain.)
+
+              If "none" is selected the browser will  not  fetch
+              any  of the video until it is played, and so with-
+              out an initial image, the video region on the page
+              will be solid black until played.
+
+              The  "auto" selection should be avoided unless you
+              know what it does and that you need  it.  This  is
+              because  with  "auto"  the  browser  may choose to
+              fetch the entire video  even  before  the  visitor
+              actively plays the video. Video files can be quite
+              large, and a large unsolicited download  might  be
+              unkind  to  your  site's  visitors;  it might even
+              cause a visitor additional  charges  depending  on
+              their   connection  service.  Also  consider  your
+              server and network load.
+
+              The flash player does not have similar attributes,
+              but  will  behave similarly with regard to an ini-
+              tial image: if one was not set,  and  the  preload
+              option  is  not "none," then the player will start
+              playback and let it advance  for  a  small  random
+              period, and then pause playback, leaving a visible
+              frame to act as a `poster.'
+
+         o    Initial volume: The video player has a volume con-
+              trol that visitors can adjust. This field will set
+              a default volume. If the web browser flash  plugin
+              is permitted to save values locally on a visitor's
+              machine, then their adjustment will be saved,  and
+              will  be  used  rather  than the default when they
+              visit again (or reload the  page).  User  settings
+    -----------
+      2 In most of the supported video file types, the
+    browser  should be able to find the metadata with-
+    out needing to retrieve too much data.
+
+
+
+
+
+
+
+
+
+                                 -9-
+
+
+              are   not   saved   for  the  HTML5  video  player
+              presently.
+
+         o    Play on load: This will cause the video  to  begin
+              playing  as  soon as the player program is loaded.
+              When this is not set, the  player  waits  for  the
+              play button.
+
+              Above,  it  was  stated  that  if scripting is not
+              available in the web  browser,  HTML5  video  will
+              have  the default appearance and behavior provided
+              by the web browser. The play on load  option  will
+              not  be  in effect in that case, because while the
+              video element can take an autoplay attribute, that
+              cannot  reliably  work  with  the  scripted  HTML5
+              player since it  might  begin  before  the  script
+              gains control of the video element.
+
+         o    Loop  play:  This  will  cause  the medium to play
+              again from the beginning each time it ends.   When
+              this  is  not  set, the video plays once, and then
+              pauses.
+
+         o    Hide control bar initially: This  will  cause  the
+              control bar to hide a few seconds after the player
+              loads (e.g., so that it does not obscure  an  ini-
+              tial  image). Note that this also changes the con-
+              trol bar behavior in general: the  bar  will  show
               whenever  mouse  movement  is  detected within the
               embedded window, and hide  again  when  there  has
-              been  no  mouse  movement for a few seconds.  When
-              this is not set, the control bar is  left  showing
-              when  the  player  loads, and thereafter is always
-              shown when the mouse is within the  embedded  win-
-              dow,  and  is  always  hidden  when  the  mouse is
-              detected leaving the window  (when  the  mouse  is
-              moved  out  of the player window with rapid motion
-              the browser or plugin often  fails  to  deliver  a
-              `mouse  has  left' event to the player program, so
+              been no mouse movement for a few seconds.
+
+              When  this  is  not  set,  the control bar is left
+              showing when the player loads, and  thereafter  is
+              always shown when the mouse is within the embedded
+              window, and is always hidden  when  the  mouse  is
+              detected  leaving  the  window  (when the mouse is
+              moved out of the player window with  rapid  motion
+              the  browser  or  plugin  often fails to deliver a
+              `mouse has left' event to the player  program,  so
               hiding the bar is not always reliable).
 
-         o    Hide and disable control bar: Enable this  if  the
+         o    Hide  and  disable control bar: Enable this if the
               media should play through without interruption.
 
          o    Allow full screen: This enables a control bar but-
               ton that will place the video in full-screen mode.
 
          o    Control bar Height (30-60): The control bar height
-              can  be adjusted with this. The range 30-60 merely
+              can be adjusted with this. The range 30-60  merely
               suggests useful sizes; it is not a fixed boundary.
-              A  good  size would be influenced by the specified
-              display dimensions on  non-mobile  platforms,  but
+              A good size would be influenced by  the  specified
+              display  dimensions  on  non-mobile platforms, but
               also  by  usability  on  mobile  platforms.  Test,
+
+
+
+
+
+
+
+
+
+                                -10-
+
+
               please.
 
 
     3.3.  The Widget
 
-         The player can also be used as a widget.  The  "Appear-
-    ance"  menu "Widgets" item should produce the "Widgets" page
-    which, after installation of  SWFPut,  should  show  "SWFPut
+         The  player can also be used as a widget.  The "Appear-
+    ance" menu "Widgets" item should produce the "Widgets"  page
+    which,  after  installation  of  SWFPut, should show "SWFPut
     Video Player" under "Available Widgets". After dragging this
-    to a widget area the setup form should  display  (click  the
-    arrow  near  the  title if necessary). The widget's form has
+    to  a  widget  area the setup form should display (click the
+    arrow near the title if necessary). The  widget's  form  has
     the  same  items  described  under  "Form  Sections"  above,
-    although  this  form  is not displayed in the three separate
-    sections and does not have the buttons near the top.   There
+    although this form is not displayed in  the  three  separate
+    sections  and does not have the buttons near the top.  There
     is one additional item at the top of the widget form: a text
-    field named "Widget title".  Not surprisingly, the  contents
-    of  that field will be displayed as a title above the widget
+    field  named "Widget title".  Not surprisingly, the contents
+    of that field will be displayed as a title above the  widget
     on the pages that include the particular widget area used.
 
     4.  License
 
          This program and all files included in the distribution
-    archive  are  under  the  GNU  GPL, version 3.  See the file
-    COPYING, which should be present in the top-level  directory
-    of   the  distribution  archive;  or,  see  the  license  at
+    archive are under the GNU GPL,  version  3.   See  the  file
+    COPYING,  which should be present in the top-level directory
+    of  the  distribution  archive;  or,  see  the  license   at
     http://www.gnu.org/licenses/.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
