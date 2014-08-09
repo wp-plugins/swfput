@@ -282,7 +282,7 @@ $jatt['a_vid'] = array(
 	'id'        => getwithdef('id', 'vh5_n_' . $vnum++),
 	'poster'    => getwithdef('iimage', ''),
 	'controls'  => 'true',
-	'preload'   => 'none',
+	'preload'   => getwithdef('preload', 'image'),
 	'autoplay'  => getwithdef('play', 'false'),
 	'loop'      => getwithdef('loop', 'false'),
 	'srcs'      => array(),
@@ -291,7 +291,19 @@ $jatt['a_vid'] = array(
 	'aspect'	=> getwithdef('aspect', '0')
 );
 
-$vstdk = array('play', 'loop', 'volume',
+switch ( $jatt['a_vid']['preload'] ) {
+	case 'none':
+	case 'metadata':
+	case 'auto':
+		break;
+	case 'image':
+	default:
+		$preload = $jatt['a_vid']['poster'] == '' ? 'metadata' : 'none';
+		break;
+}
+
+$vstdk = array(
+	'play', 'loop', 'volume', 'preload',
 	'hidebar', 'disablebar',
 	'aspectautoadj', 'aspect',
 	'displayaspect', 'pixelaspect',
@@ -324,6 +336,13 @@ function maybe_get_attach($a) {
 
 $jatt['a_vid']['poster'] = maybe_get_attach($jatt['a_vid']['poster']);
 
+// patterns always subject to revision
+$pats = array(
+	'/.*\.(mp4|m4v|mv4)$/i',
+	'/.*\.(og[gv]|vorbis)$/i',
+	'/.*\.(webm|wbm|vp[89])$/i'
+);
+
 if ( ($k = getwithdef('altvideo', '')) != '' ) {
 	$a = explode('|', $k);
 	foreach ( $a as $k ) {
@@ -331,12 +350,6 @@ if ( ($k = getwithdef('altvideo', '')) != '' ) {
 		$v = array('src' => maybe_get_attach(trim($t[0])));
 		if ( ! isset($t[1]) ) {
 			// not given: infer from suffix,
-			// patterns always subject to revision
-			$pats = array(
-				'/.*\.(mp4|m4v|mv4)$/i',
-				'/.*\.(og[gv]|vorbis)$/i',
-				'/.*\.(webm|wbm|vp[89])$/i'
-			);
 			if ( preg_match($pats[0], $v['src']) ) {
 				$tv[1] = 'video/mp4';
 			} else if ( preg_match($pats[1], $v['src']) ) {
@@ -357,8 +370,9 @@ if ( ($k = getwithdef('altvideo', '')) != '' ) {
 		$jatt['a_vid']['srcs'][] = $v;
 	}
 }
+
 $fl_url = maybe_get_attach(trim(getwithdef('url', '')));
-if ( preg_match('/.+\.(mp4|m4v)$/i', $fl_url) ) {
+if ( preg_match($pats[0], $fl_url) ) {
 	$jatt['a_vid']['srcs'][] =
 		array('src' => $fl_url, 'type' => 'video/mp4');
 }
@@ -378,10 +392,10 @@ $allvids[] = $jatt;
 	<script type="text/javascript" src="<?php echo $jsurl ?>"></script>
 	<style>
 		.main-div {
-			margin: 0px;
-			outline: 0px;
-			padding: 0px 0px;
-			border: 0px;
+			margin:  0;
+			outline: 0;
+			padding: 0;
+			border:  0;
 			background-color: black;
 		}
 	</style>

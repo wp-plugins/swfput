@@ -119,7 +119,9 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 		playpath: "",
 		altvideo: "",
 		classid: "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000",
-		codebase: "http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0"
+		codebase: "http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0",
+		align: "center",	
+		preload: "image"
 	};
 
 	ed.on('init', function() {
@@ -410,8 +412,7 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 		return dat;
 	};
 
-	var _sc_atts2if = function(url, ats, id, cap) {
-		var dat = _sc_atts2qs(ats, cap);
+	var _sc_atts2if = function(url, dat, id, cap) {
 		var qs = dat.qs;
 		var w = parseInt(dat.width), h = parseInt(dat.height);
 		var dlw = w + 60, fw = w + 16, fh = h + 16; // ugly
@@ -428,7 +429,7 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 		// for clarity, use separate vars for classes, accepting
 		// slightly more inefficiency in the concatenation chain
 		// [yearning for sprintf()]
-		var cls = ' aligncenter';
+		var cls = ' align' + dat.align;
 		var cldl = 'wp-caption evh-pseudo-dl ' + cls;
 		var cldt = 'wp-caption-dt evh-pseudo-dt';
 		var cldd = 'wp-caption-dd evh-pseudo-dd';
@@ -464,11 +465,12 @@ tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
 			sc_map[ky].n1 = n1 || '';
 			sc_map[ky].n2 = n2 || '';
 			
-			var dat = _sc_atts2if(uri, atts, 'evh-'+ky, cap);
+			var dat = _sc_atts2qs(atts, cap);
+			dat = _sc_atts2if(uri, dat, 'evh-'+ky, cap);
 			var w = dat.width, h = dat.height;
 			var dlw = parseInt(w) + 60; // ugly
-			//var cls = 'mceTemp mceIEcenter';
-			var cls = 'evhTemp';
+			var cls = 'evhTemp mceIE' + dat.align
+				+ ' align' + dat.align;
 
 			var r = n1 || '';
 			r += p1 || '';
