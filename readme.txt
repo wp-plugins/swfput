@@ -3,38 +3,47 @@ Contributors: EdHynan
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4Q2Y8ZUG8HXLC
 Tags: video, video player, movies, tube, flash, flash video, html5, html5 video, graphics, movie, video content, a/v content
 Requires at least: 3.0.2
-Tested up to: 3.9
-Stable tag: 2.1.1
+Tested up to: 4.1
+Stable tag: 2.2.1
 Text Domain: swfput_l10n
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
-SWFPut provides a video players for posts and pages and widget areas, as both flash and HTML5 video.
+SWFPut provides video players for posts and pages and widget areas, as both HTML5 and flash video.
 
 == Description ==
 
-SWFPut provides video players for posts and pages, and
-in widget areas with an included video widget. There
-are two video player programs included: one for the
-flash plugin, and one for the HTML5 video element.
+SWFPut provides 'responsive' video for posts and pages.
+SWFPut makes the presentation of video reliable for your
+visitors: several conditions are handled well, such as
+the uneven support for HTML5 video formats in the major
+browsers, the possible lack of support for either HTML5
+video or flash video in the visitor's browser, and even
+the possiblilty that JavaScript might be disabled in your
+visitor's browser.
 
-As well as providing video player programs, SWFPut makes
-video setup easy by providing a full featured form with
-fields for your video URL's and the necessary details.
+In addition to video for posts and pages, SWFPut provides
+a video widget for use in widget areas, such as a sidebar.
+
+SWFPut video is 'responsive': it should display at a
+suitable size on your visitor's device, whether large
+or small (a responsive WordPress theme is necessary).
+
+SWFPut makes video setup easy and flexible by providing
+a full featured form with sensible defaults.
 For posts and pages, the form appears in a new "metabox"
 on the editor page. For widgets, the form appears with
 the usual drag and drop widget interface. After adding
 video objects, the form will continue to be useful for
 making changes (or, if you wish, to delete the video).
 
-In WordPress versions 3.3 and greater, SWFPut makes the
-WordPress "Visual" editor for posts and pages display the
-video in context.
+In WordPress versions 3.3 and greater, video added by
+SWFPut will be visible in the post/page visual editor.
 
 As many video objects as you wish can be placed in posts
 pages, and of course the widget supports as many instances
-as you wish. Note that widget support may be theme-dependent.
-You may specify flash or HTML5 video, or both with one
+as you wish.
+You may specify HTML5 or flash video, or both with one
 being primary content and the other as fallback.
 
 Here are some features of SWFPut to consider:
@@ -65,9 +74,9 @@ Here are some features of SWFPut to consider:
 	for off-site of 3rd party resources.
 
 *	SWFPut does not interfere with the appearance of
-	a site: a video is presented much like an image
+	a site: a video is presented jsut as an image
 	(such as .png or .jpg) is, with the same sort of
-	border and optional caption. The appearance of the
+	style, and optional caption. The appearance of the
 	video control interface, or control bar, is simple
 	and quiet so it should not clash with site design.
 
@@ -85,7 +94,7 @@ Here are some features of SWFPut to consider:
 *	The core features of the flash video player program
 	included with SWFPut have been verified to work with
 	the Gnash free-software browser plugin, which is good
-	because non-free binary-only software is bad. (At the
+	if you care about free/libre software users. (At the
 	time of this writing, Gnash does not handle the MP4
 	video container format, so it is preferable that you
 	prepare flash video in the FLV container, even using the
@@ -99,7 +108,7 @@ Here are some features of SWFPut to consider:
 	un-minified version is included, so you may modify it.
 	In fact, the zip archive available at the WordPress
 	repository includes all sources, although a POSIX/Unix
-	environment is required to build.
+	environment with certain tools is required to build.
 
 *	Localization sources are included; hopefully, polyglot
 	users will help with translations.
@@ -151,11 +160,36 @@ flash video player in more detail.
 
 == Frequently Asked Questions ==
 
-= How do give feedback to the developer? =
-Post a comment at http://agalena.nfshost.com/b1/?page_id=46
-or email edhynan at gmail, or of course go the the SWFPut
-WordPress page at https://wordpress.org/support/plugin/swfput
-and select the "Support" tab.
+= I installed SWFPut, now what? =
+
+First, note that in the editor page for posts/pages,
+there is a new 'metabox' named "SWFPut Video." It
+might be near the bottom of the page, but metaboxes
+can be moved by dragging with the mouse. (When using
+SWFPut it might be useful to drag its metabox to
+just below the editor.) If necessary click the metabox
+title to show the form.
+
+The SWFPut form might look complicated, but don't
+worry! There is help. At the top right of the WordPress
+editor pages there is a tab named (in english)
+"Help." Click that, and editor help material will drop
+down. SWFPut adds a new tab here called "SWFPut Video"
+(what else?). Click that tab and . . .
+
+. . . another drop-down, this time specifically
+for this plugin. Near the top there are two hyperlinks
+which open in a new tab/page, one for PDF documentation
+and one for (old-time style) HTML documentation. These
+are versions of the same detailed document. The remainder
+of the in-place help text addresses just a few items
+that the author (I) thought would need more explanation
+for a quick start. Please peruse these for use.
+
+Quickest of all, see the FAQ below entitled
+"Do I really need video in 3 or 4 formats?" which
+in spite of the name addresses quick and easy use
+as well as video formats.
 
 = Do I really need to understand "aspect ratio" and things? =
 
@@ -169,22 +203,70 @@ If you find that your video looks squeezed or stretched,
 you can always use a little trial & error with the display
 aspect setting until it looks good.
 
-What you *must* understand is that you *must* convert
-video to the format (the type) that the plugin or browser
-can handle; namely, FLV or MP4 for flash; and, MP4 *and*
-OGG *and* WEBM for HTML5 video. Web searches will yield
-plenty of resources on video file formats, but many of them
-will be difficult to understand if you are not experienced
-with digital video and its formats.
+= Do I really need video in 3 or 4 formats? =
 
-If you use a converter
-program designed for non-experts, you won't need to
-understand too many details. A web search should turn up
-some converter programs that might be worth a try.
+Possibly not. The help documention included with SWFPut
+discusses file formats for HTML5 and flash with a level
+of detail that -- it is hoped -- will help you make your video
+available to the broadest range of browsers used by your
+visitors. The cost of this detail is the loss of simplicity.
 
-= Why doesn't SWFPut support HTML5 video? =
+The simplest use with not-too-bad availability would be like this:
+prepare your video in MP4 format; place the URL in *either*
+the "Flash video URL..." or "HTML5 video URLs..." fields[*]
+in the setup form, and set display size in the "Pixel Width:"
+and "x Height:" fields; make sure that the cursor in the
+editor is at the spot you want, and click the
+"Place new in post" button. Publish the post/page with
+the "Update" button. Not too difficult!
 
-Update: now it does. In the words of Emily Litella, "Never mind."
+Currently many browsers support MP4 for HTML5 video,
+but not all! The flash browser plugin has supported MP4
+for a long time, but alternatives such as Gnash
+(a free-software flash plugin) might not. Availability
+will be increased significantly by adding FLV (flash)
+and OGG (or 'ogv', a patent-free, free-licensed type) formats.
+If you need video conversion software,
+a quick web search should yield several options.
+Change the procedure in the above paragraph like this:
+place the URL for the FLV type in the "Flash video URL..."
+field, place the URL for the MP4 type *and*
+the URL for the OGG type separated by a '|'
+in the "HTML5 video URLs..." field (and don't worry about
+'codec' types discussed in the help docs). Easy, and fun!
+
+Finally, to cover all the bases, amend the the above paragraph
+like this: place the URL for the FLV type in the "Flash video URL..."
+field, place the URL for the MP4 type *and*
+the URL for the OGG type *and*
+the URL for the WEBM type separated by a '|'
+between each in the "HTML5 video URLs..." field . . . .
+
+[*] MP4 can be placed in either the flash or HTML5
+URL fields and it will be effective for both, as long
+as the visitor's browser has JavaScript enabled.
+
+= What if a visitor has JavaScript disabled? =
+
+SWFPut is designed with that in mind. If scripting
+is disabled, but either flash or HTML5 video is
+available, then your video should be viewable.
+HTML5 video will have the browser's native interface
+and basic features.
+
+= How do contact to the developer? =
+
+Post a comment at
+http://agalena.nfshost.com/b1/swfput-html5-flash-wordpress-plugin/
+or email edhynan at the email provider 'gmail' with the
+top level domain 'com', or of course go the the SWFPut
+WordPress page at https://wordpress.org/support/plugin/swfput
+and select the "Support" tab.
+
+= Does the developer want to know I use SWFPut? =
+
+Yes, the developer would consider it kind of you
+to leave a comment with the URLs of your using pages.
 
 == Screenshots ==
 
@@ -197,6 +279,26 @@ Update: now it does. In the words of Emily Litella, "Never mind."
 	with dark custom colors, sidebar on left), not yet playing.
 
 == Changelog ==
+
+= 2.2 =
+* Added long overdue alignment options.
+* Added video preload option. Before now, the video element was always
+	given preload="none". Now, the specification values "none",
+	"metadata", and "auto" may be selected, or one special option
+	named (in english) "per initial image", which will use "none"
+	if if an initial image (poster) is set, or else "metadata" so
+	that the browser may display a frame of video as a poster.
+	NOTE: the new default is "per initial image" which will
+	change the behavior of existing videos that do not have
+	an initial image (or 'poster'): they will now have the
+	preload="metadata" attribute, so the browser will make a
+	small unsolicited fetch from the server, and might display
+	a frame. If that is unwanted, the preload option should
+	be set to "none."
+* Some code cleanups and reorganization.
+* Check with WordPress 4.0: OK. (Actually, WordPress 4.0-beta3,
+	and in the unlikely event that a problem arises with the
+	real WP 4.0 release, it will be addressed in a minor revision.)
 
 = 2.1.1 =
 * This release is called "Sigh" and its only change is a
@@ -386,6 +488,11 @@ Update: now it does. In the words of Emily Litella, "Never mind."
 * Initial release.
 
 == Upgrade Notice ==
+
+= 2.2 =
+* Confirmed working with WP 4.0.
+* Added alignment option.
+* Added video preload option.
 
 = 2.1.1 =
 * Chromium 3,4 broken iframe handling will not run scripts
