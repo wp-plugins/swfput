@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: video, video player, movies, tube, flash, flash video, html5, html5 video, graphics, movie, video content, a/v content
 Requires at least: 3.0.2
 Tested up to: 4.1
-Stable tag: 2.2.1
+Stable tag: 2.2.2
 Text Domain: swfput_l10n
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -280,6 +280,22 @@ to leave a comment with the URLs of your using pages.
 
 == Changelog ==
 
+= 2.2.2 =
+* Bug fix release in response to a kind user query.
+	URLs provided for video files are checked before they
+	are used (good), but elsewhere in code an array key
+	would be missing if the URL was rejected (bad), possibly
+	leading to PHP error messages appearing on page.
+
+	Now, if a faulty URL is rejected, a default video URL
+	is used, linking to a small video that says "OOPS [...]"
+	and which should get the site owners attention (site
+	visitors should find the default video inoffensive, even
+	if unexpected).
+
+= 2.2.1 =
+* Confirmed working with WP 4.1.
+
 = 2.2 =
 * Added long overdue alignment options.
 * Added video preload option. Before now, the video element was always
@@ -488,6 +504,12 @@ to leave a comment with the URLs of your using pages.
 * Initial release.
 
 == Upgrade Notice ==
+
+= 2.2.2 =
+* Bug fix release.
+
+= 2.2.1 =
+* Confirmed working with WP 4.1.
 
 = 2.2 =
 * Confirmed working with WP 4.0.

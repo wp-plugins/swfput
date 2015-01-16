@@ -1,4 +1,4 @@
-# swfput 2.2.1 Pot Source
+# swfput 2.2.2 Pot Source
 # Copyright (C) 2013 Ed Hynan
 # This file is distributed under the same license as the swfput package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: swfput 2.2.1\n"
+"Project-Id-Version: swfput 2.2.2\n"
 "Report-Msgid-Bugs-To: edhynan@gmail.com\n"
-"POT-Creation-Date: 2014-08-09 09:56-0400\n"
+"POT-Creation-Date: 2015-01-16 08:51-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -171,7 +171,7 @@ msgid "SWFPut Video"
 msgstr ""
 
 #. Label shown on widgets page
-#: swfput.php:849 swfput.php:870 swfput.php:3346
+#: swfput.php:849 swfput.php:870 swfput.php:3345
 msgid "SWFPut Video Player"
 msgstr ""
 
@@ -461,28 +461,28 @@ msgstr ""
 msgid " [A/V content \"%s\" disabled] "
 msgstr ""
 
-#: swfput.php:2722
+#: swfput.php:2721
 msgid "Video playback is not available"
 msgstr ""
 
-#: swfput.php:2883
+#: swfput.php:2882
 msgid "Video playback is not available."
 msgstr ""
 
 #. TRANSLATORS perl-type regular expression
 #. that matches a 'yes'
-#: swfput.php:3219
+#: swfput.php:3218
 msgid "/^?y(e((s|ah)!?)?)?$/i"
 msgstr ""
 
 #. TRANSLATORS perl-type regular expression
 #. that matches a 'no'
-#: swfput.php:3222
+#: swfput.php:3221
 msgid "/^n(o!?)?)?$/i"
 msgstr ""
 
 #. Description shown under label shown on widgets page
-#: swfput.php:3348
+#: swfput.php:3347
 msgid "Flash and HTML5 video for your widget areas"
 msgstr ""
 
