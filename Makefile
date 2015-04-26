@@ -1,7 +1,7 @@
 #! /usr/bin/make -f
 # License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
 
-PRJVERS = 2.2.2.1
+PRJVERS = 2.9
 PRJSTEM = swfput
 PRJNAME = $(PRJSTEM)-$(PRJVERS)
 
@@ -10,9 +10,6 @@ COPYRIGHT_YEAR   = 2013
 TRANS_BUGS_EMAIL = edhynan@gmail.com
 
 SRCS = ${PRJSTEM}.php \
-	help_txt.php \
-	xed_form.php \
-	xed_widget_form.php \
 	Options_0_0_2b.inc.php \
 	OptField_0_0_2b.inc.php \
 	OptSection_0_0_2b.inc.php \
@@ -21,10 +18,16 @@ SRCS = ${PRJSTEM}.php \
 	wpabspath.php \
 	index.php
 
+INCLD = php-inc
+INCS  = ${INCLD}/class-SWF-params-evh.php \
+	${INCLD}/class-SWF-put-widget-evh.php \
+	${INCLD}/xed_form.php \
+	${INCLD}/xed_widget_form.php \
+	${INCLD}/help_txt.php 
+
 # The Opt*.php are support classes, not tied to this plugin,
 # so they do not share the text-domain and are not args to xgettext
-POTSRCS = ${PRJSTEM}.php help_txt.php \
-	xed_form.php xed_widget_form.php mce_ifm.php
+POTSRCS = ${PRJSTEM}.php ${INCS} mce_ifm.php
 
 DOCSD = docs
 JSDIR = js
@@ -53,7 +56,7 @@ ALSO = Makefile COPYING version.sh
 READS= README README.pdf README.html
 ZALL = ${SRCS} ${ALSO} ${READS} ${SDEFS} readme.txt
 ZSALL = ${SSRCS} #${SBINS}
-ZDIR = $(H5DIR) $(SDIRI) $(JSDIR) $(LCDIR) $(DOCSD)
+ZDIR = $(H5DIR) $(INCLD) $(SDIRI) $(JSDIR) $(LCDIR) $(DOCSD)
 BINALL = ${SBINS} ${JSBIN}
 PRJDIR = ${PRJNAME}
 PRJZIP = ${PRJNAME}.zip
@@ -65,7 +68,7 @@ PHPCLI = php -f
 
 all: ${PRJZIP}
 
-${PRJZIP}: ${SBINS} ${SDEFS} ${H5BIN} ${JSBIN} ${ZALL} ${LCFPO}
+${PRJZIP}: ${SBINS} ${SDEFS} ${H5BIN} ${JSBIN} ${ZALL} ${INCS} ${LCFPO}
 	test -e ttd && rm -rf ttd; test -e ${PRJDIR} && mv ${PRJDIR} ttd; \
 	mkdir ${PRJDIR} && \
 	cp -r -p ${ZALL} ${ZDIR} ${PRJDIR} && \

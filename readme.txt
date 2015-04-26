@@ -3,8 +3,8 @@ Contributors: EdHynan
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4Q2Y8ZUG8HXLC
 Tags: video, video player, movies, tube, flash, flash video, html5, html5 video, graphics, movie, video content, a/v content
 Requires at least: 3.0.2
-Tested up to: 4.1
-Stable tag: 2.2.2.1
+Tested up to: 4.2
+Stable tag: 2.9
 Text Domain: swfput_l10n
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -272,13 +272,25 @@ to leave a comment with the URLs of your using pages.
 
 1. The SWFPut widget setup form (bottom).
 
-2. The SWFPut posts/page setup form ('meta box') with the first
-	section hidden.
+2. The SWFPut posts/page setup setup details dialog.
 
 3. The appearance of video placed by SWFPut (Twentyeleven theme
 	with dark custom colors, sidebar on left), not yet playing.
 
 == Changelog ==
+
+= 2.9 =
+* A new interface for adding and configuring videos in the
+	visual editor. The interface now shares many properties
+	with the WordPress media interface, and uses much of the
+	new and maturing core code.  Users will find video setup
+	easier, and familiar.  The origonal setup form in a
+	metabox remains available and may be considered an
+	advanced form, as it retains configuration items that
+	will not be added to the new simplified interface.
+	The new interface is only available for WordPress 4.x,
+	and support for 4.0 and 4.1 might be removed in the future
+	(users are advised to keep WordPress up to date).
 
 = 2.2.2.1 =
 * Sigh. Just added a forgotten file (from 2.2.2). The default
@@ -515,6 +527,19 @@ to leave a comment with the URLs of your using pages.
 
 == Upgrade Notice ==
 
+= 2.9 =
+* A new interface for adding and configuring videos in the
+	visual editor. The interface now shares many properties
+	with the WordPress media interface, and uses much of the
+	new and maturing core code.  Users will find video setup
+	easier, and familiar.  The origonal setup form in a
+	metabox remains available and may be considered an
+	advanced form, as it retains configuration items that
+	will not be added to the new simplified interface.
+	The new interface is only available for WordPress 4.x,
+	and support for 4.0 and 4.1 might be removed in the future
+	(users are advised to keep WordPress up to date).
+
 = 2.2.2.1 =
 * Sigh. Just added a forgotten file (from 2.2.2).
 
@@ -531,7 +556,7 @@ to leave a comment with the URLs of your using pages.
 
 = 2.1.1 =
 * Chromium 3,4 broken iframe handling will not run scripts
-	with attribute sandbox="allowScripts", so sanbox is removed.
+	with attribute sandbox="allowScripts", so sandbox is removed.
 	Do web search 'Chromium iframe scripts' to see Chromium dither.
 
 = 2.1 =
