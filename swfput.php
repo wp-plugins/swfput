@@ -3,7 +3,7 @@
 Plugin Name: SWFPut
 Plugin URI: http://agalena.nfshost.com/b1/swfput-html5-flash-wordpress-plugin
 Description: Add Flash and HTML5 video to WordPress posts, pages, and widgets, from arbitrary URI's or media library ID's or files in your media upload directory tree (including uploads not in the WordPress media library).
-Version: 2.2.2.1
+Version: 2.9
 Author: Ed Hynan
 Author URI: http://agalena.nfshost.com/b1/
 License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
@@ -101,9 +101,8 @@ endif;
 
 
 /**********************************************************************\
- *  Class defs: main plugin. widget, and support classes              *
+ *  Class defs: main plugin.                                          *
 \**********************************************************************/
-
 
 /**
  * main class flash/HTML5 video for WP pages
@@ -114,7 +113,7 @@ class SWF_put_evh {
 	const plugin_webpage = 'http://agalena.nfshost.com/b1/swfput-html5-flash-wordpress-plugin';
 	
 	// this version
-	const plugin_version = '2.2.2.1';
+	const plugin_version = '2.9';
 	
 	// the widget class name
 	const swfput_widget = 'SWF_put_widget_evh';
@@ -189,6 +188,9 @@ class SWF_put_evh {
 	// Settings page object
 	protected $spg = null;
 
+	// php include file sub-directory
+	const includedir = 'php-inc';
+
 	// swfput program directory
 	const swfputdir = 'evhflv';
 	// swfput program binary name
@@ -230,7 +232,13 @@ class SWF_put_evh {
 	// swfput js shortcode editor helper name
 	const swfxpljsname = 'editor_plugin.min.js';
 	const swfxpljsname3x = 'editor_plugin3x.min.js';
+	// starting wp 4.1, swfput 2.9 -- using WP media _.Backbone stuff
+	// 'wpmt' for wp media template
+	const swfwpmtsname = 'putswf_tpl.php';
 	
+	// min ver for new edit interface (wp.media-like)
+	protected static $media_edit_wp_minver = 0;
+
 	// html5 video front-end js
 	const evhv5vjsdir  = 'evhh5v';
 	const evhv5vjsname = 'front.min.js';
@@ -248,6 +256,8 @@ class SWF_put_evh {
 	const evhv5vsvg_but = 'ctrbut.svg';
 	// set to map of svg file names -> URL
 	protected $evhv5v_svgs;
+	// for mce ajax fueled display; WP 4.1, swfput 2.9
+	protected $evhv5v_data;
 	
 	// hold an instance
 	private static $instance;
@@ -291,6 +301,13 @@ class SWF_put_evh {
 
 		$this->in_wdg_do_shortcode = 0;
 		
+		// for new mce editor interface -- tested 1sr w/ WP 4.1.1;
+		// moreover the WP core code is new and changing --
+		// so this is the min WP ver we'll use the new code with --
+		// Added v 2.9
+		self::$media_edit_wp_minver =
+		    (4 << 24) | (1 << 16) | (1 << 8) | 0;
+
 		if ( ($this->full_init = $init) !== true ) {
 			// must do this
 			$this->init_opts();
@@ -434,7 +451,7 @@ class SWF_put_evh {
 					. '</a>',
 				array($this, 'put_general_desc'));
 
-		// placement section: (posts, sidebar, header)
+		// placement section: (posts, sidebar)
 		$nf = 0;
 		$fields = array();
 		$fields[$nf++] = new $Cf(self::opth5vprim,
@@ -452,19 +469,13 @@ class SWF_put_evh {
 				self::optdispwdg,
 				$items[self::optdispwdg],
 				array($this, 'put_widget_opt'));
-		if ( self::use_tinymce_plugin_ok() )
+		if ( self::use_tinymce_plugin_ok() ) {
 			$fields[$nf++] = new $Cf(self::opttinymce,
 				self::wt(__('Video in post editor:', 'swfput_l10n')),
 				self::opttinymce,
 				$items[self::opttinymce],
 				array($this, 'put_tinymce_opt'));
-		// commented: from early false assumption that header
-		// could be easily hooked:
-		//$fields[$nf++] = new $Cf(self::optdisphdr,
-				//self::wt(__('Place in header area:', 'swfput_l10n')),
-				//self::optdisphdr,
-				//$items[self::optdisphdr],
-				//array($this, 'put_inhead_opt'));
+		}
 
 		// section object includes description callback
 		$sections[$ns++] = new $Cs($fields,
@@ -577,7 +588,7 @@ class SWF_put_evh {
 		if ( ! is_array($a) ) {
 			$a = array();
 		}
-		// checkbox id will 'verbose_show-hide'
+		// checkbox id will be 'verbose_show-hide'
 		$a['verbose_show'] = __('Section introductions', 'swfput_l10n');
 		return $a;
 	}
@@ -733,6 +744,7 @@ class SWF_put_evh {
 	// on init, e.g. mce plugin in the post-related pages
 	public static function hook_admin_init() {
 		if ( self::use_tinymce_plugin() ) {
+			$cl = __CLASS__;
 			// tinymce version in 3.0.3 n.g. and next testing
 			// version of WP I have is 3.3.1
 			$v = (3 << 24) | (3 << 16) | (0 << 8) | 0;
@@ -740,19 +752,104 @@ class SWF_put_evh {
 	
 			if ( $ok && current_user_can( 'edit_posts' )
 				&& current_user_can( 'edit_pages' ) ) {
-				$aa = array(__CLASS__, 'add_mceplugin_js');
+				$aa = array($cl, 'add_mceplugin_js');
 				add_filter('mce_external_plugins', $aa);
-				$aa = array(__CLASS__, 'filter_mce_init');
+				$aa = array($cl, 'filter_mce_init');
 				add_filter('tiny_mce_before_init', $aa);
 			}
+
+			// next actions are for new features tested w/
+			// WP 4.1.1
+			$v = self::$media_edit_wp_minver;
+			$ok = self::wpv_min($v);
+	
+			if ( $ok && current_user_can( 'edit_posts' )
+				&& current_user_can( 'edit_pages' ) ) {
+				// v 2.9: stick a media 'button' too, for
+				// for snazzy JS dialog presentation of the
+				// metabox form (or something like it)
+				$aa = array($cl, 'action_media_button');
+				add_action('media_buttons', $aa);
+
+				if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+					$pf = self::mk_pluginfile();
+					$inst = self::get_instance();
+					
+					$inst->evhv5v_data = array(
+						'styles'  => array(),
+						'scripts' => array(),
+					);
+
+					$t = self::evhv5vcssdir . '/' . self::evhv5vcssname
+					    . '?ver=' . self::plugin_version;
+					$stfile = plugins_url($t, $pf);
+					$inst->evhv5v_data['styles'][] = $stfile;
+
+					$t = self::evhv5vjsdir . '/' . self::evhv5vjsname
+					    . '?ver=' . self::plugin_version;
+					$jsfile = plugins_url($t, $pf);
+					$inst->evhv5v_data['scripts'][] = $jsfile;
+
+					if ( ! is_array($inst->evhv5v_svgs) ) {
+						$t = self::evhv5vsvgdir;
+						$inst->evhv5v_svgs = array(
+							self::evhv5vsvg_bar =>
+								plugins_url($t . '/' .
+									self::evhv5vsvg_bar, $pf),
+							self::evhv5vsvg_vol =>
+								plugins_url($t . '/' .
+									self::evhv5vsvg_vol, $pf),
+							self::evhv5vsvg_but =>
+								plugins_url($t . '/' .
+									self::evhv5vsvg_but, $pf)
+						);
+					}
+
+					$af = 'parse_putswf_video_shortcode';
+					$ah = 'wp_ajax_' . $af;
+					$aa = array($cl, $af);
+					add_action($ah, $aa);
+				} else {
+					// this is not needed on ajax invoke; just main page
+					$af = 'put_putswf_video_editor_template';
+					$ah = 'print_media_templates';
+					$aa = array($cl, $af);
+					add_action($ah, $aa);
+				}
+			}
 		}
+	}
+
+	// action to add media button, like core 'Add Media',
+	// for new v 2.9 wp.media based stuff
+	// Initially, lifted code from wp-admin/includes/media.php
+	// function media_buttons()
+	public static function action_media_button($editor_id = 'content') {
+		static $is1st = 0;
+
+		$txt = __('Add SWFPut Video', 'swfput_l10n');
+
+		// this must be just so -- do not put text within span
+		$spn = '<span class="wp-media-buttons-icon"></span> ' . $txt;
+
+		$id_attr = ' id="evhvid-putvid-input-' . $is1st++ . '"';
+
+		printf(
+		'<a href="%s"%s class="%s" data-editor="%s" title="%s">%s</a>',
+			'#', //'SWFPut_add_button_func();', in editor_plugin.js
+			$id_attr,
+			'button insert-media add_media',
+			esc_attr($editor_id),
+			esc_attr($txt),
+			$spn
+		);
 	}
 
 	// filter for any mce plugin init settings needs (and testing)
 	public static function filter_mce_init($init_array) {
 		// FPO, presently
 		if ( false ) {
-			//$init_array['wpeditimage_disable_captions'] = true;
+			// e.g. $init_array['wpeditimage_disable_captions'] = true;
 			$init_array['keep_styles'] = true;
 		}
 		return $init_array;
@@ -819,6 +916,15 @@ class SWF_put_evh {
 				}
 		
 				$info = array('a' => ABSPATH, 'i' => $rn, 'u' => $u);
+
+				// Added 2.9: tinymce display w/ wp.media stuff
+				// WP 4.1.1 -- do not even try w/ < 4.1; moreover,
+				// an option to disable this is a todo --
+				// TODO: make option for this.
+				$v = self::$media_edit_wp_minver;
+				$ok = self::wpv_min($v);
+				$info['_bbone_mvc_opt'] = $ok ? 'true' : 'false';
+
 				printf('
 					<script type="text/javascript">
 						var swfput_mceplug_inf = %s;
@@ -834,7 +940,7 @@ class SWF_put_evh {
 		$v = (3 << 24) | (3 << 16) | (0 << 8) | 0;
 		$ok = self::wpv_min($v);
 
-		include 'help_txt.php';
+		include self::mk_pluginincpath('help_txt.php');
 		$hlptxt = swfput_get_helptext(self::$helphtml, self::$helppdf);
 
 		// put help tab content, for 3.3.0 or greater . . .
@@ -876,7 +982,6 @@ class SWF_put_evh {
 	// register shortcode editor forms javascript
 	public static function filter_admin_print_scripts() {
 		// cap check: not sure if this is necessary here,
-		// hope it doesn't cause failures for legit users
 	    if ( $GLOBALS['editing']
 			&& (current_user_can('edit_posts')
 			||  current_user_can('edit_pages')) ) {
@@ -928,7 +1033,7 @@ class SWF_put_evh {
 			return;
 		}
 		
-		$fn = rtrim(dirname(__FILE__), '/') . '/wpabspath.php';
+		$fn = self::mk_pluginsubpath('wpabspath.php');
 		$fh = fopen($fn, 'r+b');
 		if ( ! $fh ) {
 			return;
@@ -1002,6 +1107,75 @@ class SWF_put_evh {
 			$cl = self::swfput_widget;
 			unregister_widget($cl);
 		}
+	}
+
+	// Added 2.9, needs min WP 4.1 --
+	// action hook for 'print_media_templates' --
+	// put wp media template(s) for video in editor
+	public static function put_putswf_video_editor_template () {
+		$tfile = self::swfwpmtsname;
+
+		$t     = self::settings_jsdir . '/' . $tfile;
+		$tfile = self::mk_plugindir() . '/' . $t;
+
+		include $tfile;
+	}
+
+	// Added 2.9, needs min WP 4.1 --
+	// copied from wp_ajax_parse_media_shortcode()
+	// in wp-admin/includes/ajax-actions.php
+	// and altered as necessary
+	public static function parse_putswf_video_shortcode () {
+		global $post, $wp_scripts;
+
+		if ( ! $post = get_post( (int) $_POST['post_ID'] ) ) {
+			wp_send_json_error();
+		}
+	
+		if ( empty( $_POST['shortcode'] )
+		     || ! current_user_can( 'edit_post', $post->ID ) ) {
+			wp_send_json_error();
+		}
+	
+		setup_postdata( $post );
+		$shortcode = do_shortcode( wp_unslash( $_POST['shortcode'] ) );
+	
+		if ( empty( $shortcode ) ) {
+			wp_send_json_error( array(
+				'type' => 'no-items',
+				'message' => __( 'No items found.' ),
+			) );
+		}
+	
+		$head = '';
+		$inst = self::get_instance();
+		$a_st = $inst->evhv5v_data['styles'];
+		$a_sc = $inst->evhv5v_data['scripts'];
+
+		foreach ( $a_st as $style ) {
+			$head .= '<link type="text/css" rel="stylesheet" href="'
+				. $style
+				. '"></link>';
+		}
+	
+		foreach ( $a_sc as $script ) {
+			$head .= '<script type="text/javascript" src="'
+				. $script
+				. '"></script>';
+		}
+	
+		if ( ! empty( $wp_scripts ) ) {
+			$wp_scripts->done = array();
+		}
+	
+		ob_start();
+	
+		echo $shortcode;
+	
+		wp_send_json_success( array(
+			'head' => $head,
+			'body' => ob_get_clean()
+		) );
 	}
 
 	// the 'init' hook callback
@@ -1701,7 +1875,7 @@ class SWF_put_evh {
 	public static function put_xed_form() {
 		// EH: 20.07.2014
 		// Form markup and code moved to file xed_form.php
-		require 'xed_form.php';
+		require self::mk_pluginincpath('xed_form.php');
 	}
 
 	// wrap do_shortcode() to set a flag for the callback
@@ -1764,7 +1938,7 @@ class SWF_put_evh {
 		$c = '';
 		// Note '!=' -- not '!=='
 		if ( $content != null ) {
-			$c = do_shortcode($content);
+			$c = self::prep_caption(do_shortcode($content));
 			$c = '</p><p><span class="caption">'
 				. $c . '</span></p><p>';
 		}
@@ -1825,7 +1999,7 @@ class SWF_put_evh {
 		$c = '';
 		// Note '!=' -- not '!=='
 		if ( $content != null ) {
-			$c = do_shortcode($content);
+			$c = self::prep_caption(do_shortcode($content));
 			$pr->setvalue('caption', $c);
 			$c = '<p class="wp-caption-text">' . $c . '</p>';
 		}
@@ -1888,7 +2062,32 @@ class SWF_put_evh {
 		}
 		return $out;
 	}
-	
+
+	// Story: v 2.9 uses WP wp.media stuff, and WP 4.2 breaks captions
+	// in the editor by stripping html elements or by replacing
+	// < and > with entities -- v 2.9 has some workarounds but has
+	// not found a way to prevent data-save conversion from angles to
+	// entities -- so this is a regrettable hack to replace  the
+	// entities with angles again -- 1st func is callback; not anon
+	// because still want to run w/ php 5.2 -- because quotes are
+	// getting relaced w/ typographical chars too.
+	public static function prep_caption_cback($cap) {
+		return preg_replace('/&(#822[01]|[rl]dquo);/', '"',
+			preg_replace('/&(#821[67]|[rl]squo);/', "'", $cap[0])
+		);
+	}
+	public static function prep_caption($cap) {
+		$cb = array(__CLASS__, 'prep_caption_cback');
+		// this re is imperfect but will mostly work
+		$r1 = '/(&lt;|<)[^\&>]+=[^><]*(&gt;|>)/';
+
+		return preg_replace('/&gt;/', '>',
+		  preg_replace('/&lt;/', '<',
+		    preg_replace_callback($r1, $cb, $cap)
+		  )
+		);
+	}
+
 	// get video <div>+<script> id strings
 	// $base is base od <div> id,
 	public function get_div_ids($base) {
@@ -1964,6 +2163,22 @@ class SWF_put_evh {
 		return $pf;
 	}
 	
+	
+	// use mk_plugindir() and append separator and argument
+	// $addlpath which is expected to name a subdir, a file,
+	// both, or empty string (default) to get the dir w/ sep.
+	public static function mk_pluginsubpath($addlpath = '') {
+		return self::mk_plugindir() . '/' . ltrim($addlpath, '/');
+	}
+
+	// use mk_pluginsubpath() to get plugin's include dir,
+	// append $addlpath which is expected to name a file,
+	// or empty string (default) to get the dir w/ sep.
+	public static function mk_pluginincpath($addlpath = '') {
+		$d = self::includedir;
+		return self::mk_pluginsubpath($d) . '/' . ltrim($addlpath, '/');
+	}
+
 	// help for plugin file path/name; __FILE__ alone
 	// is not good enough -- see comment in body of mk_plugindir()
 	public static function mk_pluginfile() {
@@ -1971,18 +2186,16 @@ class SWF_put_evh {
 			return self::$pluginfile;
 		}
 	
-		$pf = self::mk_plugindir();
-		$ff = basename(__FILE__);
+		$pf = self::mk_pluginsubpath(basename(__FILE__));
 		
 		// store and return corrected file path
-		return self::$pluginfile = $pf . '/' . $ff;
+		return self::$pluginfile = $pf;
 	}
 	
 	// help for swf player file path/name; it is
 	// contained in the plugin directory
 	public static function mk_playerdir() {
-		$pd = self::mk_plugindir();
-		return $pd . '/' . self::swfputdir;
+		return self::mk_pluginsubpath(self::swfputdir);
 	}
 
 	// help for swf player file path/name; it is
@@ -2404,12 +2617,32 @@ class SWF_put_evh {
 	 * check that URL passed in query is OK; re{encode,escape}
 	 * $args is array of booleans, plus two regex pats -- all optional
 	 * requirehost, requirepath, rejuser, rejport, rejquery, rejfrag +
-	 * rxproto, rxpath (regex search patterns); true requirehost
-	 * implies proto is required
+	 * rxproto, rxpath (regex search patterns); consider requirehost to
+	 * imply proto is required
 	 * $fesc is escaping function for path, if wanted; e.g. urlencode()
 	 */
 	public static function check_url($url, $args = array(), $fesc = '') {
-		extract($args);
+		//extract($args);
+		// when this was 1st written WP core used extract() freely, but
+		// it is now a function non grata: one named concern is
+		// readability; obscure origin of vars seen in code, so readers:
+		// the array elements in the explicit extraction below will
+		// appear as variable names later.
+		foreach(array(
+			'requirehost',
+			'requirepath',
+			'rejuser',
+			'rejport',
+			'rejquery',
+			'rejfrag',
+			'rxproto',
+			'rxpath',
+			'requirehost') as $k) {
+			if ( isset($args[$k]) ) {
+				$$k = $args[$k];
+			}
+		}
+
 		$ourl = '';
 		$p = '/';
 		$ua = parse_url($url);
@@ -2548,7 +2781,48 @@ class SWF_put_evh {
 
 	// return array with media elements as string in ['el']
 	public function get_player_elements($uswf, $par, $ids = null) {
-		extract($par->getparams());
+		//extract($par->getparams());
+		// when this was 1st written WP core used extract() freely, but
+		// it is now a function non grata: one named concern is
+		// readability; obscure origin of vars seen in code, so readers:
+		// the array elements in the explicit extraction below may
+		// appear as variable names later.
+		$args = $par->getparams();
+		foreach(array(
+			'caption',
+			'url',
+			'defaulturl',
+			'defrtmpurl',
+			'cssurl',
+			'iimage',
+			'width',
+			'height',
+			'mobiwidth',
+			'audio',
+			'aspectautoadj',
+			'displayaspect',
+			'pixelaspect',
+			'volume',
+			'play',
+			'hidebar',
+			'disablebar',
+			'iimgbg',
+			'barheight',
+			'quality',
+			'allowfull',
+			'allowxdom',
+			'loop',
+			'mtype',
+			'playpath',
+			'altvideo',
+			'defaultplaypath',
+			'classid',
+			'codebase',
+			'align',
+			'preload') as $k) {
+			$$k = $args[$k];
+		}
+
 		$ming = self::should_use_ming();
 		$esc = true;
 		
@@ -3054,445 +3328,29 @@ else :
 endif; // if ( ! class_exists('SWF_put_evh') ) :
 
 
+/**********************************************************************\
+ *  Class defs: widget, and support classes.                          *
+ *  As of 2.9 classes are in their own files under plugin subdir      *
+ *  'php-inc'                                                         *
+\**********************************************************************/
+
 /**
  * class providing embed and player parameters, built around array --
- * uncommented, but it's simple and obvious
- * values are all strings, even if empty or numeric etc.
  */
 if ( ! class_exists('SWF_params_evh') ) :
-class SWF_params_evh {
-	protected static $defs = array(
-		'caption' => '',		   // added for forms, not embed object
-		'url' => '',
-		'defaulturl' => 'default', // subs. distributed default file
-		'defrtmpurl' => 'rtmp://cp82347.live.edgefcs.net/live', //akamai
-		'cssurl' => '',
-		'iimage' => '',
-		'width' => '240',
-		'height' => '180',
-		'mobiwidth' => '0',        // width if ( wp_is_mobile() )
-		'audio' => 'false',        // source is audio; (mp3 is detected)
-		'aspectautoadj' => 'true', // adj. common sizes, e.g. 720x480
-		'displayaspect' => '0',    // needed if pixels are not square
-		'pixelaspect' => '0',      // use if display aspect unknown
-		'volume' => '50',          // if host has no saved setting
-		'play' => 'false',         // play (or pause) on load
-		'hidebar' => 'true',       // initially hide control bar
-		'disablebar' => 'false',   // disable and hide control bar
-		'iimgbg' => 'true',        // use iimage arg as alt. img element
-		'barheight' => '36',
-		'quality' => 'high',
-		'allowfull' => 'true',
-		'allowxdom' => 'false',
-		'loop' => 'false',
-		'mtype' => 'application/x-shockwave-flash',
-		// rtmp
-		'playpath' => '',
-		// alternative <video> within object
-		'altvideo' => '',
-		'defaultplaypath' => '',
-		// <object>
-		'classid' => 'clsid:d27cdb6e-ae6d-11cf-96b8-444553540000',
-		'codebase' => 'http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0',
-		// align, for alignment class in markup:
-		// left, center, right, none
-		'align' => 'center',
-		'preload' => 'image'
-	);
-
-	protected $inst = null; // modifiable copy per instance
-	
-	public function __construct($copy = null) {
-		$this->inst = self::$defs;
-		if ( is_array($copy) )
-			$this->setarray($copy);
-	}
-	
-	public static function getdefs() { return self::$defs; }
-	public function getparams() { return $this->inst; }
-	public function getkeys() { return array_keys($this->inst); }
-	public function getvalues() { return array_values($this->inst); }
-	public function getvalue($key) {
-		if ( array_key_exists($key, $this->inst) ) {
-			return $this->inst[$key];
-		}
-		return null;
-	}
-	public function getdefault($key) {
-		if ( array_key_exists($key, self::$defs) ) {
-			return self::$defs[$key];
-		}
-		return null;
-	}
-	public function setvalue($key, $val) {
-		if ( array_key_exists($key, $this->inst) ) {
-			$t = $this->inst[$key];
-			$this->inst[$key] = $val;
-			return $t;
-		}
-		return null;
-	}
-	public function setnewvalue($key, $val) {
-		if ( array_key_exists($key, $this->inst) ) {
-			$t = $this->inst[$key];
-		} else {
-			$t = $val;
-		}
-		$this->inst[$key] = $val;
-		return $t;
-	}
-	public function setdefault($key) {
-		if ( array_key_exists($key, self::$defs) ) {
-			$t = $this->inst[$key];
-			$this->inst[$key] = self::$defs[$key];
-			return $t;
-		}
-		return null;
-	}
-	public function setarray($ar) {
-		// array_replace is new w/ 5.3; want 5.2 here
-		//$this->inst = array_replace($this->inst, $ar);
-		// so . . .
-		foreach ( $ar as $k => $v ) {
-			if ( array_key_exists($k, self::$defs) ) {
-				$this->inst[$k] = $v;
-			}
-		}
-		return $this;
-	}
-	public function setnewarray($ar) {
-		// array_replace is new w/ 5.3; want 5.2 here
-		//$this->inst = array_replace($this->inst, $ar);
-		// so . . .
-		foreach ( $ar as $k => $v ) {
-			$this->inst[$k] = $v;
-		}
-		return $this;
-	}
-	public function cmpval($key) {
-		return (self::$defs[$key] === $this->inst[$key]);
-	}
-	public function sanitize($fuzz = true) {
-		$i = &$this->inst;
-		// check against default keys; if instance map has
-		// other keys, leave them
-		foreach ( self::$defs as $k => $v ) {
-			if ( ! array_key_exists($k, $i) ) {
-				$i[$k] = $v;
-				continue;
-			}
-			$t = trim(' ' . $i[$k]);
-			switch ( $k ) {
-			// strings that must present positive integers
-			case 'width':
-			case 'height':
-			case 'mobiwidth':
-			case 'volume':
-			case 'barheight':
-				if ( $k === 'barheight' && $t === 'default' ) {
-					continue;
-				}
-				if ( $fuzz === true && preg_match('/^\+?[0-9]+/',$t) ) {
-					$t = sprintf('%u', absint($t));
-				}
-				if ( ! preg_match('/^[0-9]+$/', $t) ) {
-					$t = $v;
-				}
-				$i[$k] = $t;
-				break;
-			// strings that must present booleans
-			case 'audio':
-			case 'aspectautoadj':
-			case 'play':
-			case 'hidebar':
-			case 'disablebar':
-			case 'iimgbg':
-			case 'allowfull':
-			case 'allowxdom':
-			case 'loop':
-				$t = strtolower($t);
-				if ( $t !== 'true' && $t !== 'false' ) {
-					if ( $fuzz === true ) {
-						// TRANSLATORS perl-type regular expression
-						// that matches a 'yes'
-						$xt = __('/^?y(e((s|ah)!?)?)?$/i', 'swfput_l10n');
-						// TRANSLATORS perl-type regular expression
-						// that matches a 'no'
-						$xf = __('/^n(o!?)?)?$/i', 'swfput_l10n');
-						if ( is_numeric($t) ) {
-							$t = $t == 0 ? 'false' : 'true';
-						} else if ( preg_match($xf, $t) ) {
-							$t = 'false';
-						} else if ( preg_match($xt, $t) ) {
-							$t = 'true';
-						} else {
-							$t = $v;
-						}
-					} else {
-						$t = $v;
-					}
-				}
-				$i[$k] = $t;
-				break;
-			// special format: ratio strings
-			case 'displayaspect':
-			case 'pixelaspect':
-				// exception: these allow one alpha as special flag,
-				// or 0 to disable
-				if ( preg_match('/^[A-Z0]$/i', $t) ) {
-					$i[$k] = $t;
-					break;
-				}
-				if ( $fuzz === true ) {
-					$sep = '[Xx[:punct:][:space:]]+';
-				} else {
-					$sep = '[Xx:]';
-				}
-				// exception: allow FLOAT or FLOATsep1
-				$px = '/^\+?([0-9]+(\.[0-9]+)?)(' . $sep . '([0-9]+(\.[0-9]+)?))?$/';
-				// wanted: INTsepINT;
-				$pw  = '/^([0-9]+)' . $sep . '([0-9]+)$/';
-				$m = array();
-				if ( preg_match($px, $t, $m) ) {
-					$i[$k] = $m[1] . ($m[4] ? (':' . $m[4]) : ':1');
-				} else if ( preg_match($pw, $t, $m) ) {
-					$i[$k] = $m[1] . ':' . $m[2];
-				} else {
-					$i[$k] = $v;
-				}
-				break;
-			// strings with a set of valid values that can be checked
-			case 'align':
-				switch ( $t ) {
-					case 'left':
-					case 'right':
-					case 'center':
-					case 'none':
-						break;
-					default:
-						$i[$k] = $v;
-						break;
-				}
-				break;
-			case 'preload':
-				switch ( $t ) {
-					case 'none':
-					case 'metadata':
-					case 'auto':
-					case 'image':
-						break;
-					default:
-						$i[$k] = $v;
-						break;
-				}
-				break;
-			// varied complex strings; not sanitized here
-			case 'caption':
-			case 'url':
-			case 'cssurl':
-			case 'iimage':
-			case 'mtype':
-			case 'playpath':
-			case 'altvideo':
-			case 'classid':
-			case 'codebase':
-				break;
-			// for reference defaults discard any changes,
-			// e.g. 'defaulturl'
-			default:
-				$i[$k] = $v;
-				break;
-			}
-		}
-	}
-} // End class SWF_params_evh
+ require_once SWF_put_evh::mk_pluginincpath('class-SWF-params-evh.php');
 else :
-	wp_die('class name conflict: SWF_params_evh in ' . __FILE__);
+ wp_die('class name conflict: SWF_params_evh in ' . __FILE__);
 endif; // if ( ! class_exists('SWF_params_evh') ) :
 
 /**
- * class handling swf video as widget; uses SWF_put_evh
+ * class handling video as widget; uses SWF_put_evh
  */
 if ( ! class_exists('SWF_put_widget_evh') ) :
-class SWF_put_widget_evh extends WP_Widget {
-	// main plugin class name
-	const swfput_plugin = 'SWF_put_evh';
-	// params helper class name
-	const swfput_params = 'SWF_params_evh';
-	// an instance of the main plugin class
-	protected $plinst;
-	
-	// default width should not be wider than sidebar, but
-	// widgets may be placed elsewhere, e.g. near bottom
-	// 216x138 is suggested minimum size in Adobe docs,
-	// because flash user settings dialog is clipped if 
-	// window is smaller; AFAIK recent plugins refuse to map
-	// the context menu rather than let it be clipped.
-	// 216 is a bit wide for a sidebar (in some themes),
-	// consider 200x150
-	// Update: included JS now sizes the display if enclosing
-	// div is sized smaller than its style.width; this is a
-	// good thing.
-	const defwidth  = 200; // is 4:3 aspect
-	const defheight = 150; //
-
-
-	public function __construct() {
-		$this->plinst = SWF_put_evh::get_instance(false);
-	
-		$cl = __CLASS__;
-		// Label shown on widgets page
-		$lb =  __('SWFPut Video Player', 'swfput_l10n');
-		// Description shown under label shown on widgets page
-		$desc = __('Flash and HTML5 video for your widget areas', 'swfput_l10n');
-		$opts = array('classname' => $cl, 'description' => $desc);
-
-		// control opts width affects the parameters form,
-		// height is ignored.  Width 400 allows long text fields
-		// (not as log as most URL's), and informative (long) labels
-		$copts = array('width' => 400, 'height' => 500);
-
-		parent::__construct($cl, $lb, $opts, $copts);
-	}
-
-	// surely this code cannot run under PHP4, but anyway . . .
-	public function SWF_put_widget_evh() {
-		$this->__construct();
-	}
-
-	public function widget($args, $instance) {
-		$opt = $this->plinst->get_widget_plugin_option();
-		if ( $opt != 'true' ) {
-			return;
-		}
-		
-		$pr = self::swfput_params;
-		$pr = new $pr();
-		$pr->setnewarray($instance);
-
-		if ( ! $pr->getvalue('width') ) {
-			$pr->setvalue('width', self::defwidth);
-		}
-		if ( ! $pr->getvalue('height') ) {
-			$pr->setvalue('height', self::defheight);
-		}
-
-		$pr->sanitize();
-		$w = $pr->getvalue('width');
-		$h = $pr->getvalue('height');
-
-		// Added v. 1.0.7; 2014/01/24:
-		// if wp_is_mobile is a defined function (wp 3.4?), then
-		// honor new param 'mobiwidth' to set the dimensions
-		// (proportionally to regular WxH) for mobile devices
-		// user can set $mobiwidth 0 to disable this
-		$mobiwidth = 0 + $pr->getvalue('mobiwidth');
-		if ( $mobiwidth > 0 && function_exists('wp_is_mobile') ) {
-			if ( wp_is_mobile() ) {
-				$h = (int)($h * $mobiwidth / $w);
-				$w = $mobiwidth;
-			}
-		}
-
-		$cap = $this->plinst->wt($pr->getvalue('caption'));
-		$uswf = $this->plinst->get_swf_url();
-		// added 2.2: $pr->getvalue('align')
-		$aln = 'align' . $pr->getvalue('align');
-
-		// overdue: 2.1 removed deprecated align
-		$dv = sprintf(
-			'class="widget %s" style="width: %upx; max-width: 100%%"',
-			$aln, $w);
-
-		extract($args);
-
-		// note *no default* for title; allow empty title so that
-		// user may place this below another widget with
-		// apparent continuity (subject to filters)
-		$title = apply_filters('widget_title',
-			empty($instance['title']) ? '' : $instance['title'],
-			$instance, $this->id_base);
-
-		echo $before_widget;
-
-		// 2.2: title is now assigned to $elem['enter'] (below) which
-		// places it just after opening of enclosing div in get_div()
-		// so, no more "echo $before_title . $title . $after_title;"
-		// but, before and after are still needed
-		if ( $title ) {
-			$title = $before_title . $title . $after_title;
-		}
-
-		if ( $cap ) {
-			$cap = '<p class="caption"><span class="caption-span">'
-				. $cap . '</span></p>';
-		}
-
-		// setup and print inner video div
-		$ids  = $this->plinst->get_div_ids('widget-div');
-		$elem = $this->plinst->get_player_elements($uswf, $pr, $ids);
-		if ( $title ) {
-			$elem['enter'] = $title;
-		}
-		printf('%s', $this->plinst->get_div($ids, $dv, $cap, $elem));
-
-		echo $after_widget;
-	}
-
-	public function update($new_instance, $old_instance) {
-		$pr = self::swfput_params;
-		$pr = new $pr();
-		
-		if ( is_array($old_instance) ) {
-			$pr->setnewarray($old_instance);
-		}
-		if ( is_array($new_instance) ) {
-			$pr->setnewarray($new_instance);
-		}
-		
-		$pr->sanitize();
-		$i = $pr->getparams();
-		if ( is_array($new_instance) ) {
-			// for pesky checkboxes; not present if unchecked, but
-			// present 'false' is wanted
-			foreach ( $i as $k => $v ) {
-				if ( ! array_key_exists($k, $new_instance) ) {
-					$t = $pr->getdefault($k);
-					// booleans == checkboxes
-					if ( $t == 'true' || $t == 'false' ) {
-						$i[$k] = 'false';
-					}
-				}
-			}
-		}
-
-		if ( ! array_key_exists('caption', $i) ) {
-			$i['caption'] = '';
-		}
-		if ( ! array_key_exists('title', $i) ) {
-			$i['title'] = '';
-		}
-		if ( ! $i['width'] ) {
-			$i['width'] = self::defwidth;
-		}
-		if ( ! $i['height'] ) {
-			$i['height'] = self::defheight;
-		}
-		if ( ! $i['align'] ) {
-			$i['align'] = $pr->getdefault('align');
-		}
-
-		return $i;
-	}
-
-	public function form($instance) {
-		// EH: 20.07.2014
-		// code and markup moved into file xed_widget_form.php
-		require 'xed_widget_form.php';
-	}
-} // End class SWF_put_widget_evh
+ require_once
+   SWF_put_evh::mk_pluginincpath('class-SWF-put-widget-evh.php');
 else :
-	wp_die('class name conflict: SWF_put_widget_evh in ' . __FILE__);
+  wp_die('class name conflict: SWF_put_widget_evh in ' . __FILE__);
 endif; // if ( ! class_exists('SWF_put_widget_evh') ) :
 
 

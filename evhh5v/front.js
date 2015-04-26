@@ -35,6 +35,17 @@
  */
 
 
+/*
+ * Notes on implementation:
+ * Code herein is straight {ECMA,Java}script, working directly
+ * with the DOM.
+ * 
+ * There are no libraries used.  It is intended that this code
+ * might be reused in whole or in part in an arbitrary context,
+ * including possible constraints on acceptable libraries.
+ * 
+ */
+
 
 /**********************************************************************\
  *                                                                    *
@@ -1316,6 +1327,7 @@ mk_volume : function(parentobj, xoff) {
 	var r  = butwidth * 0.5;  // radius
 	var rs = r - this.btnstrokewid;  // radius, for stroke
 	var rh = r - this.btnhighltwid;  // radius, for highlight
+	var cx, cy;
 
 	// relay event handler
 	var that = this;
@@ -4036,9 +4048,15 @@ evhh5v_controller.prototype = {
 			alert(ex.name + ': "' + ex.message + '"');
 		}
 	},
+	volctl_showing: false,
 	togglevolctl : function() {
 		// delay pointer/bar hiding for volume interaction
 		this.ptrtick = 0;
+
+		if ( this.volctl_showing == undefined ) {
+			this.volctl_showing = false;
+		}
+
 		if ( ! this.volctl_showing ) {
 			this.show_volctl();
 		} else {
@@ -4131,7 +4149,10 @@ evhh5v_controller.prototype = {
 		}
 	},
 
-	// handle control bar click per object.id
+	// handle control bar click per object.id -- obj is probably
+	// a button on the control bar with expected id; but, no
+	// other property than id should be used so that this method
+	// may be invoked like foo.button_click({id: 'stop'});
 	button_click : function(obj) {
 		switch ( obj.id ) {
 			case "playpause":
