@@ -1,4 +1,4 @@
-# swfput 2.9 Pot Source
+# swfput 3.0 Pot Source
 # Copyright (C) 2013 Ed Hynan
 # This file is distributed under the same license as the swfput package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
@@ -6,10 +6,10 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: swfput 2.9\n"
+"Project-Id-Version: swfput 3.0\n"
 "Report-Msgid-Bugs-To: edhynan@gmail.com\n"
-"POT-Creation-Date: 2015-04-26 08:39-0400\n"
-"PO-Revision-Date: 2015-04-26 08:39 EDT\n"
+"POT-Creation-Date: 2015-05-07 19:41-0400\n"
+"PO-Revision-Date: 2015-05-07 19:41 EDT\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: en_US\n"
@@ -157,7 +157,7 @@ msgstr ""
 "\t\t\tof this page, to take effect.\n"
 "\t\t\t</p>"
 
-#: swfput.php:638 swfput.php:1744
+#: swfput.php:638 swfput.php:1749
 msgid "Show verbose introductions"
 msgstr "Show verbose introductions"
 
@@ -208,37 +208,37 @@ msgstr "SWFPut Video Player"
 msgid "Settings"
 msgstr "Settings"
 
-#: swfput.php:1146
+#: swfput.php:1151
 msgid "No items found."
 msgstr "No items found."
 
-#: swfput.php:1366
+#: swfput.php:1371
 #, possible-php-format
 msgid "bad choice: \"%s\""
 msgstr "bad choice: \"%s\""
 
-#: swfput.php:1407
+#: swfput.php:1412
 #, possible-php-format
 msgid "bad key in option validation: \"%s\""
 msgstr "bad key in option validation: \"%s\""
 
-#: swfput.php:1421
+#: swfput.php:1426
 msgid "Settings updated successfully"
 msgstr "Settings updated successfully"
 
-#: swfput.php:1422
+#: swfput.php:1427
 #, possible-php-format
 msgid "One (%d) setting updated"
 msgid_plural "Some settings (%d) updated"
 msgstr[0] "One (%d) setting updated"
 msgstr[1] "Some settings (%d) updated"
 
-#: swfput.php:1454 swfput.php:1501 swfput.php:1586 swfput.php:1642
-#: swfput.php:1696
+#: swfput.php:1459 swfput.php:1506 swfput.php:1591 swfput.php:1647
+#: swfput.php:1701
 msgid "Introduction:"
 msgstr "Introduction:"
 
-#: swfput.php:1457
+#: swfput.php:1462
 msgid ""
 "The verbose option selects whether\n"
 "\t\t\tverbose descriptions\n"
@@ -256,7 +256,7 @@ msgstr ""
 "\t\t\twill not be shown if the option is not\n"
 "\t\t\tselected."
 
-#: swfput.php:1467
+#: swfput.php:1472
 msgid ""
 "The PHP+Ming option selects whether\n"
 "\t\t\t\tthe Flash player program is generated with PHP\n"
@@ -282,12 +282,12 @@ msgstr ""
 "\t\t\t\tNote that this option will increase the load on the\n"
 "\t\t\t\tserver of your site."
 
-#: swfput.php:1488 swfput.php:1571 swfput.php:1627 swfput.php:1679
-#: swfput.php:1720
+#: swfput.php:1493 swfput.php:1576 swfput.php:1632 swfput.php:1684
+#: swfput.php:1725
 msgid "Go forward to save button."
 msgstr "Go forward to save button."
 
-#: swfput.php:1503
+#: swfput.php:1508
 msgid ""
 "These options control video placement.\n"
 "\t\t\t</p><p>\n"
@@ -383,7 +383,7 @@ msgstr ""
 "\t\t\tor empty if there was no caption.\n"
 "\t\t\t"
 
-#: swfput.php:1553
+#: swfput.php:1558
 msgid ""
 "\n"
 "\t\t\tThe \"Video in post editor\" multiple choice option\n"
@@ -401,11 +401,11 @@ msgstr ""
 "\t\t\twhen the \"Visual\" tab is selected.\n"
 "\t\t\t"
 
-#: swfput.php:1573 swfput.php:1629 swfput.php:1681 swfput.php:1722
+#: swfput.php:1578 swfput.php:1634 swfput.php:1686 swfput.php:1727
 msgid "Go back to top (General section)."
 msgstr "Go back to top (General section)."
 
-#: swfput.php:1589
+#: swfput.php:1594
 msgid ""
 "\n"
 "\t\t\t<strong>These options are deprecated and will be\n"
@@ -467,7 +467,7 @@ msgstr ""
 "\t\t\tand so it increases server load. User parameters\n"
 "\t\t\tare not available for this method."
 
-#: swfput.php:1645
+#: swfput.php:1650
 msgid ""
 "\n"
 "\t\t\t<strong>These options are deprecated and will be\n"
@@ -519,11 +519,11 @@ msgstr ""
 "\t\t\tthen cut and\n"
 "\t\t\tpasted into the widget text, on a line of its own.)"
 
-#: swfput.php:1687
+#: swfput.php:1692
 msgid "Install options:"
 msgstr "Install options:"
 
-#: swfput.php:1699
+#: swfput.php:1704
 msgid ""
 "This section includes optional\n"
 "\t\t\tfeatures for plugin install or uninstall. Presently\n"
@@ -551,59 +551,59 @@ msgstr ""
 "\t\t\tpossibly for a new version or update, then keeping the\n"
 "\t\t\toptions might be helpful."
 
-#: swfput.php:1761
+#: swfput.php:1766
 msgid "Use SWF script if PHP+Ming is available"
 msgstr "Use SWF script if PHP+Ming is available"
 
-#: swfput.php:1770
+#: swfput.php:1775
 msgid "The SWFPut editor plugin is not supported in this installation"
 msgstr "The SWFPut editor plugin is not supported in this installation"
 
-#: swfput.php:1775
+#: swfput.php:1780
 msgid "When to display video in post editor"
 msgstr "When to display video in post editor"
 
-#: swfput.php:1779
+#: swfput.php:1784
 msgid "Always display video in the post editor"
 msgstr "Always display video in the post editor"
 
-#: swfput.php:1780
+#: swfput.php:1785
 msgid "Only when the browser platform is not mobile"
 msgstr "Only when the browser platform is not mobile"
 
-#: swfput.php:1781
+#: swfput.php:1786
 msgid "Never display video in the post editor"
 msgstr "Never display video in the post editor"
 
-#: swfput.php:1815
+#: swfput.php:1820
 msgid "Enable widget or shortcode"
 msgstr "Enable widget or shortcode"
 
-#: swfput.php:1822
+#: swfput.php:1827
 msgid "Place HTML5 video as primary content"
 msgstr "Place HTML5 video as primary content"
 
-#: swfput.php:1829
+#: swfput.php:1834
 msgid "Enable shortcode or attachment search"
 msgstr "Enable shortcode or attachment search"
 
-#: swfput.php:1836
+#: swfput.php:1841
 msgid "Search attachments in posts"
 msgstr "Search attachments in posts"
 
-#: swfput.php:1843
+#: swfput.php:1848
 msgid "Enable the included widget"
 msgstr "Enable the included widget"
 
-#: swfput.php:1850
+#: swfput.php:1855
 msgid "Enable shortcodes in widgets"
 msgstr "Enable shortcodes in widgets"
 
-#: swfput.php:1857
+#: swfput.php:1862
 msgid "Enable shortcode in posts"
 msgstr "Enable shortcode in posts"
 
-#: swfput.php:1864
+#: swfput.php:1869
 msgid "Permanently delete settings (clean db)"
 msgstr "Permanently delete settings (clean db)"
 
@@ -625,16 +625,16 @@ msgstr "Permanently delete settings (clean db)"
 #. '%s' is any caption provided for a/v, if any,
 #. prepended with ASCII space ' '; '%s' is an empty string
 #. if there is no caption
-#: swfput.php:1907 swfput.php:1969
+#: swfput.php:1912 swfput.php:1974
 #, possible-php-format
 msgid " [A/V content \"%s\" disabled] "
 msgstr " [A/V content \"%s\" disabled] "
 
-#: swfput.php:2995
+#: swfput.php:3000
 msgid "Video playback is not available"
 msgstr "Video playback is not available"
 
-#: swfput.php:3156
+#: swfput.php:3161
 msgid "Video playback is not available."
 msgstr "Video playback is not available."
 
@@ -898,13 +898,41 @@ msgstr "Mobile width (0 disables) :"
 #, possible-php-format
 msgid ""
 "<p>\n"
-"\tHopefully, much of the SWFPut setup form\n"
-"\tis self-explanatory.\n"
+"\t<strong>Add SWFPut Video</strong> - Just above the\n"
+"\tthe editor toolbars, <em>WordPress</em> places the\n"
+"\t\"Add Media\" button. Next to that, you will find the\n"
+"\t\"Add SWFPut Video\" button. First, place the cursor in\n"
+"\tthe editor at the place for your video, then click\n"
+"\tthe button. A placeholder video will appear, ready to\n"
+"\tsetup. It should be selected by default; click\n"
+"\tit to select it if necessary.\n"
+"\t</p>\n"
+"\t<p>\n"
+"\t<strong>Editing</strong> - when a <em>SWFPut</em>\n"
+"\tvideo is selected two buttons should appear -- one button\n"
+"\tlooks like a pencil. and this opens a graphical editor \n"
+"\tdialog box, similar to the one used for <em>WordPress</em>\n"
+"\tcore media editing but with some different features.\n"
+"\t</p>\n"
+"\t<p>\n"
+"\tThis dialog provides basic setup suitable for most video.\n"
+"\t<em>SWFPut</em> provides a few features not found in\n"
+"\tthe setup dialog (which is meant to be simple and easy).\n"
+"\tAdvanced setup is done with a form in a \"metabox\" on\n"
+"\tthe editor page. You will probably not need this, but\n"
+"\tif you think you might, read on. The remainder of this\n"
+"\thelp section concerns the metabox advanced form, but if\n"
+"\t<em>SWFPut</em> is new to you, please start with the\n"
+"\tsteps described above.\n"
+"\t</p>\n"
+"\t<p>\n"
 "\tThere is more detailed documentation as HTML\n"
 "\t<a href=\"%s\" target=\"_blank\">here (in a new tab)</a>,\n"
 "\tor as a PDF file\n"
 "\t<a href=\"%s\" target=\"_blank\">here (in a new tab)</a>.\n"
-"\t</p><p>\n"
+"\t</p>\n"
+"\t<h3>The Metabox Form</h3>\n"
+"\t<p>\n"
 "\tThere is one important restriction on the form's\n"
 "\ttext entry fields. The values may not have any\n"
 "\tASCII '&quot;' (double quote) characters. Hopefully\n"
@@ -912,7 +940,7 @@ msgid ""
 "\t</p><p>\n"
 "\tThe following items probably need explanation:\n"
 "\t</p><p>\n"
-"\t<h3>Flash or HTML5 video URLs or media library IDs</h3>\n"
+"\t<h4>Flash or HTML5 video URLs or media library IDs</h4>\n"
 "\tNear the top of the form, after the \"Caption\" field,\n"
 "\ta text entry field named\n"
 "\t\"Flash video URL or media library ID\" appears.\n"
@@ -994,7 +1022,7 @@ msgid ""
 "\tbut browsers might reject that\n"
 "\tusage, so SWFPut will normalize the codecs argument.\n"
 "\t</p><p>\n"
-"\t<h3>Use initial image as no-video alternate</h3>\n"
+"\t<h4>Use initial image as no-video alternate</h4>\n"
 "\tThis checkbox, if enabled (it is, by default) will\n"
 "\tuse the \"initial image file\" that may be specified\n"
 "\tfor the video player in an 'img' element\n"
@@ -1016,7 +1044,7 @@ msgid ""
 "\t(top/bottom or left/right tranparent\n"
 "\tareas might be one solution).\n"
 "\t</p><p>\n"
-"\t<h3>Mobile width</h3>\n"
+"\t<h4>Mobile width</h4>\n"
 "\tThis input field appears just below the\n"
 "\tpixel dimensions fields. If this value is\n"
 "\tgreater than zero, and a mobile browser is\n"
@@ -1033,7 +1061,7 @@ msgid ""
 "\tdisables this feature, and it has no effect if\n"
 "\ta mobile browser is not detected.\n"
 "\t</p><p>\n"
-"\t<h3>Video preload</h3>\n"
+"\t<h4>Video preload</h4>\n"
 "\tThis \"radio\" type option is in the <b>Behavior</b> section\n"
 "\tof the form. HTML5 video allows a \"preload\" attribute\n"
 "\twith a value of \"none\" or \"metadata\" or \"auto.\" This\n"
@@ -1079,13 +1107,41 @@ msgid ""
 "\t</p>"
 msgstr ""
 "<p>\n"
-"\tHopefully, much of the SWFPut setup form\n"
-"\tis self-explanatory.\n"
+"\t<strong>Add SWFPut Video</strong> - Just above the\n"
+"\tthe editor toolbars, <em>WordPress</em> places the\n"
+"\t\"Add Media\" button. Next to that, you will find the\n"
+"\t\"Add SWFPut Video\" button. First, place the cursor in\n"
+"\tthe editor at the place for your video, then click\n"
+"\tthe button. A placeholder video will appear, ready to\n"
+"\tsetup. It should be selected by default; click\n"
+"\tit to select it if necessary.\n"
+"\t</p>\n"
+"\t<p>\n"
+"\t<strong>Editing</strong> - when a <em>SWFPut</em>\n"
+"\tvideo is selected two buttons should appear -- one button\n"
+"\tlooks like a pencil. and this opens a graphical editor \n"
+"\tdialog box, similar to the one used for <em>WordPress</em>\n"
+"\tcore media editing but with some different features.\n"
+"\t</p>\n"
+"\t<p>\n"
+"\tThis dialog provides basic setup suitable for most video.\n"
+"\t<em>SWFPut</em> provides a few features not found in\n"
+"\tthe setup dialog (which is meant to be simple and easy).\n"
+"\tAdvanced setup is done with a form in a \"metabox\" on\n"
+"\tthe editor page. You will probably not need this, but\n"
+"\tif you think you might, read on. The remainder of this\n"
+"\thelp section concerns the metabox advanced form, but if\n"
+"\t<em>SWFPut</em> is new to you, please start with the\n"
+"\tsteps described above.\n"
+"\t</p>\n"
+"\t<p>\n"
 "\tThere is more detailed documentation as HTML\n"
 "\t<a href=\"%s\" target=\"_blank\">here (in a new tab)</a>,\n"
 "\tor as a PDF file\n"
 "\t<a href=\"%s\" target=\"_blank\">here (in a new tab)</a>.\n"
-"\t</p><p>\n"
+"\t</p>\n"
+"\t<h3>The Metabox Form</h3>\n"
+"\t<p>\n"
 "\tThere is one important restriction on the form's\n"
 "\ttext entry fields. The values may not have any\n"
 "\tASCII '&quot;' (double quote) characters. Hopefully\n"
@@ -1093,7 +1149,7 @@ msgstr ""
 "\t</p><p>\n"
 "\tThe following items probably need explanation:\n"
 "\t</p><p>\n"
-"\t<h3>Flash or HTML5 video URLs or media library IDs</h3>\n"
+"\t<h4>Flash or HTML5 video URLs or media library IDs</h4>\n"
 "\tNear the top of the form, after the \"Caption\" field,\n"
 "\ta text entry field named\n"
 "\t\"Flash video URL or media library ID\" appears.\n"
@@ -1175,7 +1231,7 @@ msgstr ""
 "\tbut browsers might reject that\n"
 "\tusage, so SWFPut will normalize the codecs argument.\n"
 "\t</p><p>\n"
-"\t<h3>Use initial image as no-video alternate</h3>\n"
+"\t<h4>Use initial image as no-video alternate</h4>\n"
 "\tThis checkbox, if enabled (it is, by default) will\n"
 "\tuse the \"initial image file\" that may be specified\n"
 "\tfor the video player in an 'img' element\n"
@@ -1197,7 +1253,7 @@ msgstr ""
 "\t(top/bottom or left/right tranparent\n"
 "\tareas might be one solution).\n"
 "\t</p><p>\n"
-"\t<h3>Mobile width</h3>\n"
+"\t<h4>Mobile width</h4>\n"
 "\tThis input field appears just below the\n"
 "\tpixel dimensions fields. If this value is\n"
 "\tgreater than zero, and a mobile browser is\n"
@@ -1214,7 +1270,7 @@ msgstr ""
 "\tdisables this feature, and it has no effect if\n"
 "\ta mobile browser is not detected.\n"
 "\t</p><p>\n"
-"\t<h3>Video preload</h3>\n"
+"\t<h4>Video preload</h4>\n"
 "\tThis \"radio\" type option is in the <b>Behavior</b> section\n"
 "\tof the form. HTML5 video allows a \"preload\" attribute\n"
 "\twith a value of \"none\" or \"metadata\" or \"auto.\" This\n"

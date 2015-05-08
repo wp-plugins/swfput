@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Sun Apr 26 14:05:14 2015 -->
+<!-- CreationDate: Fri May  8 11:18:31 2015 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -48,8 +48,8 @@ and as the conventional &lsquo;README&rsquo; as well.</p>
 
 <p style="margin-top: 1em"><b>SWFPut</b> is a plugin for
 <i>WordPress</i>. It provides video player programs for the
-flash plugin and and the HTML video element, and the means
-to configure the players with video sources and playback
+HTML video element and the flash plugin, and the means to
+configure the players with video sources and playback
 attributes. There are two separate components: the video
 players, and the <i>WordPress</i> plugin proper. The video
 players are delivered to site visitors by the plugin as
@@ -69,10 +69,13 @@ know what a shortcode is, or do not want to deal with them,
 that&rsquo;s no problem. (In fact, it is preferable that the
 shortcodes <i>not</i> be hand-edited, and they will not be
 discussed in detail here.) The plugin adds to the post/page
-editor interfaces a full featured form to setup and add, or
-edit, or delete video objects, so the user does not need to
-be troubled with shortcodes. The video widget has a similar
-full featured form.</p>
+editor interfaces a button to insert video at the cursor,
+and an easy to use dialog-type setup interface similar to
+that used by <i>WordPress</i> core media, and also a full
+featured form in a &ldquo;metabox&rdquo; with additional
+advanced settings to setup and add, or edit, or delete video
+objects. The video widget has a similar full featured form
+for setup.</p>
 
 <p style="margin-top: 1em">Video in posts may be displayed
 in the <i>WordPress</i> visual editor, if the default visual
@@ -153,8 +156,17 @@ includes optional verbose help, and so it will not be
 described here.</p>
 
 <p style="margin-top: 1em">In the post and page editors,
-the plugin adds an interactive form in a new metabox with
-the title &ldquo;SWFPut Video&rdquo;. Directly under the
+the plugin adds a button, labelled &ldquo;Add SWFPut
+Video,&rdquo; next to the &ldquo;Add Media&rdquo; button.
+This will insert a placeholder video at the cursor position.
+When selected, a pencil button will appear, which invokes a
+graphical setup dialog. This dialog is expected to be easy
+and intuitive, so it is not elaborated on here.</p>
+
+<p style="margin-top: 1em"><b>SWFPut</b> also adds an
+interactive form in a new metabox with the title
+&ldquo;SWFPut Video&rdquo;. This form has advanced settings
+not available in the graphical dialog. Directly under the
 title is a row of buttons. Under the row of buttons, the
 bulk of the form is placed in three sections entitled
 &ldquo;Media&rdquo;, &ldquo;Dimensions&rdquo;, and
@@ -327,7 +339,8 @@ find files added by hand upload (rather than with the
 from media library</b>: This is a drop-down list from which
 the URL field may be set, as above, with the difference that
 it searches the <i>WordPress</i> media database, and
-presents the suitable filenames with their media IDs.</p></td></tr>
+presents the suitable filenames with their media
+ID&rsquo;s.</p> </td></tr>
 <tr valign="top" align="left">
 <td width="10%"></td>
 <td width="2%">
@@ -339,7 +352,7 @@ presents the suitable filenames with their media IDs.</p></td></tr>
 
 
 <p style="margin-top: 1em"><b>HTML5 video URLs or media
-library IDs</b>: A series of URLs for the HTML5 video
+library ID&rsquo;s</b>: A series of URLs for the HTML5 video
 player. If more than one URL is given, they should be
 separated by the &lsquo;<tt>|</tt>&rsquo; (pipe) character.
 Each individual URL may be appended with an argument for the
@@ -401,7 +414,7 @@ assumption that you are adding multiple resources for the
 necessary HTML5 video formats. When the URL field content is
 appended, a &lsquo;<tt>|</tt>&rsquo; (pipe) character is
 used as a separator. See &ldquo;HTML5 video URLs or media
-library IDs&rdquo; above.</p></td></tr>
+library ID&rsquo;s&rdquo; above.</p></td></tr>
 <tr valign="top" align="left">
 <td width="10%"></td>
 <td width="2%">
@@ -468,7 +481,7 @@ library</b>: This is a drop-down list from which the
 &ldquo;<b>Url of initial image file (optional)</b>&rdquo;
 field may be set, as above, with the difference that it
 searches the <i>WordPress</i> media database, and presents
-the suitable filenames with their media IDs.</p></td></tr>
+the suitable filenames with their media ID&rsquo;s.</p></td></tr>
 <tr valign="top" align="left">
 <td width="10%"></td>
 <td width="2%">
