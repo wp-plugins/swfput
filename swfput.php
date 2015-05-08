@@ -3,7 +3,7 @@
 Plugin Name: SWFPut
 Plugin URI: http://agalena.nfshost.com/b1/swfput-html5-flash-wordpress-plugin
 Description: Add Flash and HTML5 video to WordPress posts, pages, and widgets, from arbitrary URI's or media library ID's or files in your media upload directory tree (including uploads not in the WordPress media library).
-Version: 2.9
+Version: 3.0
 Author: Ed Hynan
 Author URI: http://agalena.nfshost.com/b1/
 License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
@@ -113,7 +113,7 @@ class SWF_put_evh {
 	const plugin_webpage = 'http://agalena.nfshost.com/b1/swfput-html5-flash-wordpress-plugin';
 	
 	// this version
-	const plugin_version = '2.9';
+	const plugin_version = '3.0';
 	
 	// the widget class name
 	const swfput_widget = 'SWF_put_widget_evh';
@@ -212,7 +212,7 @@ class SWF_put_evh {
 
 	// for a link to an html help doc
 	const helphtmlname = 'README.html';
-	const helphtml_ref = '#3.1. Form Buttons';
+	const helphtml_ref = '#3. Usage';
 	protected static $helphtml = null;
 	// for a link to an pdf help doc
 	const helppdfname = 'README.pdf';
@@ -1127,8 +1127,13 @@ class SWF_put_evh {
 	// and altered as necessary
 	public static function parse_putswf_video_shortcode () {
 		global $post, $wp_scripts;
+		// old versions of WP possibly ~<= 3.3 have get_post()
+		// take arg by reference, so even though this pertains
+		// to code that should not execute on those versions, to
+		// make sure the code parses: use a distinct var for the arg.
+		$post_req = (int) $_POST['post_ID']; // had been in func parens
 
-		if ( ! $post = get_post( (int) $_POST['post_ID'] ) ) {
+		if ( ! $post = get_post( $post_req ) ) {
 			wp_send_json_error();
 		}
 	

@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: video, video player, movies, tube, flash, flash video, html5, html5 video, graphics, movie, video content, a/v content
 Requires at least: 3.0.2
 Tested up to: 4.2
-Stable tag: 2.9
+Stable tag: 3.0
 Text Domain: swfput_l10n
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -30,8 +30,10 @@ suitable size on your visitor's device, whether large
 or small (a responsive WordPress theme is necessary).
 
 SWFPut makes video setup easy and flexible by providing
-a full featured form with sensible defaults.
-For posts and pages, the form appears in a new "metabox"
+an easy dialog based setup similar to (and based on)
+that used by WordPress core media, and also an
+advanced form with additional settings, which
+appears in a new "metabox"
 on the editor page. For widgets, the form appears with
 the usual drag and drop widget interface. After adding
 video objects, the form will continue to be useful for
@@ -278,6 +280,27 @@ to leave a comment with the URLs of your using pages.
 	with dark custom colors, sidebar on left), not yet playing.
 
 == Changelog ==
+
+= 3.0 =
+* This release includes an improvement to the responsive
+	sizing of video: the height of a video is now limited
+	to fit within the visible vertical area. Previously, sizing
+	was applied to width alone. This change should be
+	most noticeable on small devices, particularly
+	handheld devices in landscape orientation. This change
+	applies to desktop browsers too, although it will
+	probably not be evident unless the browser window
+	is at a small size.
+	
+	This version has small documentation updates regarding
+	the new visual editor interface of release 2.9, and
+	one bugfix needed because of using a new WP function
+	signature changed at some point before 4.x -- this
+	would not have affected users of current WordPress,
+	but SFWPut is still supporting (i.e., working with)
+	WP as old as 3.0.2 (hopefully for no reason, since
+	old versions are probably insecure and should not be
+	used).
 
 = 2.9 =
 * A new interface for adding and configuring videos in the
@@ -526,6 +549,27 @@ to leave a comment with the URLs of your using pages.
 * Initial release.
 
 == Upgrade Notice ==
+
+= 3.0 =
+* This release includes an improvement to the responsive
+	sizing of video: the height of a video is now limited
+	to fit within the visible vertical area. Previously, sizing
+	was applied to width alone. This change should be
+	most noticeable on small devices, particularly
+	handheld devices in landscape orientation. This change
+	applies to desktop browsers too, although it will
+	probably not be evident unless the browser window
+	is at a small size.
+	
+	This version has small documentation updates regarding
+	the new visual editor interface of release 2.9, and
+	one bugfix needed because of using a new WP function
+	signature changed at some point before 4.x -- this
+	would not have affected users of current WordPress,
+	but SFWPut is still supporting (i.e., working with)
+	WP as old as 3.0.2 (hopefully for no reason, since
+	old versions are probably insecure and should not be
+	used).
 
 = 2.9 =
 * A new interface for adding and configuring videos in the

@@ -23,8 +23,8 @@
     1.  What is it?
 
          SWFPut is a plugin for WordPress.   It  provides  video
-    player  programs for the flash plugin and and the HTML video
-    element, and the means to configure the players  with  video
+    player  programs  for  the  HTML video element and the flash
+    plugin, and the means to configure the  players  with  video
     sources  and  playback  attributes.   There are two separate
     components: the video  players,  and  the  WordPress  plugin
     proper.  The video players are delivered to site visitors by
@@ -42,11 +42,13 @@
     a  shortcode;  if you do not know what a shortcode is, or do
     not want to deal with them, that's no problem.  (In fact, it
     is  preferable  that  the shortcodes not be hand-edited, and
-    they will not be discussed in detail here.) The plugin  adds
-    to  the  post/page editor interfaces a full featured form to
-    setup and add, or edit, or delete video objects, so the user
-    does  not  need  to  be troubled with shortcodes.  The video
-    widget has a similar full featured form.
+    they will not be discussed in detail here.)  The plugin adds
+    to  the post/page editor interfaces a button to insert video
+    at the cursor, and an easy to use dialog-type  setup  inter-
+    face  similar to that used by WordPress core media, and also
+    a full featured form in a "metabox" with additional advanced
+    settings to setup and add, or edit, or delete video objects.
+    The video widget has a similar full featured form for setup.
 
          Video in posts may be displayed in the WordPress visual
     editor, if the default visual editor is used. If the default
@@ -54,8 +56,6 @@
     video display in the editor will probably not work. If there
     are problems, video display in the editor may be disabled on
     the SWFPut settings page.
-
-
 
 
 
@@ -143,14 +143,22 @@
     configuration  page.   The   configuration   page   includes
     optional verbose help, and so it will not be described here.
 
-         In the post and page editors, the plugin adds an inter-
-    active form in a new metabox with the title "SWFPut  Video".
-    Directly under the title is a row of buttons.  Under the row
-    of buttons, the bulk of the form is placed in three sections
-    entitled  "Media",  "Dimensions", and "Behavior".  The title
-    bar of each section has a button that will hide or show that
-    section,  which  might  help  if  the  height of the form is
-    greater than that of the display.
+         In the post and page editors, the plugin adds a button,
+    labelled "Add SWFPut Video," next to the "Add Media" button.
+    This will insert a placeholder video at the cursor position.
+    When selected, a pencil button will appear, which invokes  a
+    graphical  setup  dialog. This dialog is expected to be easy
+    and intuitive, so it is not elaborated on here.
+
+         SWFPut also adds an interactive form in a  new  metabox
+    with  the  title "SWFPut Video". This form has advanced set-
+    tings not available in the graphical dialog.  Directly under
+    the  title  is  a row of buttons.  Under the row of buttons,
+    the bulk of the form is placed in  three  sections  entitled
+    "Media",  "Dimensions",  and  "Behavior".   The title bar of
+    each section has a button that will hide or show  that  sec-
+    tion,  which might help if the height of the form is greater
+    than that of the display.
 
 
          3.1.  Form Buttons
@@ -182,14 +190,6 @@
               desired  position, and filling out the form items,
               use this button to add a new shortcode (video).
 
-         o    Reset defaults:  Except  for  the  "Caption"  text
-              field,  all  form items are set to default values,
-              or cleared. It is assumed that text typed into the
-              "Caption"  field  would  be  better  maintained by
-              hand, so that field is not cleared.
-
-
-
 
 
 
@@ -200,6 +200,13 @@
 
 
                                  -4-
+
+
+         o    Reset defaults:  Except  for  the  "Caption"  text
+              field,  all  form items are set to default values,
+              or cleared. It is assumed that text typed into the
+              "Caption"  field  would  be  better  maintained by
+              hand, so that field is not cleared.
 
 
          3.2.  Form Sections
@@ -223,7 +230,7 @@
 
          o    Select flash video  URL  from  uploads  directory:
               This  is a drop-down list from which the URL field
-              may be set. The  WordPress  uploads  directory  is
+              may be set. The  WordPr_ss  uploads  directory  is
               searched  recursively  for files with the suffixes
               FLV, MP4, and for each a  URL  is  added  to  this
               list.   This  has  the advantage that it will find
@@ -236,12 +243,12 @@
               be set, as above,  with  the  difference  that  it
               searches   the   WordPress   media  database,  and
               presents the suitable filenames with  their  media
-              IDs.
+              ID's.
 
-         o    HTML5 video URLs or media library IDs: A series of
-              URLs for the HTML5 video player.  If more than one
-              URL  is given, they should be separated by the `|'
-              (pipe)  character.  Each  individual  URL  may  be
+         o    HTML5  video  URLs or media library ID's: A series
+              of URLs for the HTML5 video player.  If more  than
+              one  URL is given, they should be separated by the
+              `|' (pipe) character. Each individual URL  may  be
               appended with an argument for the `type' attribute
               of the video element, separated from the URL by  a
               `?'  character (do not include the `type' keyword;
@@ -249,13 +256,6 @@
               quotes in the type argument, and although many web
               examples show a space after the  comma  separating
               the  video  and  audio codec names, browsers might
-              reject the source because  of  the  space,  so  it
-              should  be  left out)1.  If more than one is given
-    -----------
-      1 For example:
-    videos/cat.mp4?video/mp4|
-    videos/cat.webm?video/webm;     codecs=vp8,vorbis|
-    videos/cat.ogv?video/ogg; codecs=theora,vorbis.
 
 
 
@@ -268,6 +268,8 @@
                                  -5-
 
 
+              reject the source because  of  the  space,  so  it
+              should  be  left out)1.  If more than one is given
               they will appear in order.  The browser should use
               the  first  type  that it supports. The MP4, WEBM,
               and  OGG  types  have  varied  support  among  web
@@ -289,7 +291,7 @@
               HTML5 video formats. When the URL field content is
               appended, a `|' (pipe) character is used as a sep-
               arator. See "HTML5 video  URLs  or  media  library
-              IDs" above.
+              ID's" above.
 
          o    Playpath  (rtmp): If the URL field for flash video
               is given an RTMP  URL,  the  `playpath'  is  given
@@ -315,13 +317,11 @@
               `add media'  interface)  if  they  are  placed  in
               uploads or a directory under it.
 
-         o    Load  image ID from media library: This is a drop-
-              down list from which the  "Url  of  initial  image
-              file  (optional)" field may be set, as above, with
-              the difference  that  it  searches  the  WordPress
-              media  database,  and  presents the suitable file-
-              names with their media IDs.
-
+    -----------
+      1 For example:
+    videos/cat.mp4?video/mp4|
+    videos/cat.webm?video/webm;     codecs=vp8,vorbis|
+    videos/cat.ogv?video/ogg; codecs=theora,vorbis.
 
 
 
@@ -333,6 +333,13 @@
 
                                  -6-
 
+
+         o    Load  image ID from media library: This is a drop-
+              down list from which the  "Url  of  initial  image
+              file  (optional)" field may be set, as above, with
+              the difference  that  it  searches  the  WordPress
+              media  database,  and  presents the suitable file-
+              names with their media ID's.
 
          o    Use initial image as  no-video  alternate:  If  an
               initial image was given, then also use it as fall-
@@ -381,13 +388,6 @@
               This feature is disabled  with  a  value  of  '0,'
               which  is  the  default,  and has no effect if the
               browser provides a user agent string not known  as
-              a mobile platform.
-
-         o    Auto  aspect:  This  enables a feature meant to be
-              helpful when the video to  be  played  might  have
-              been prepared as DVD-Video (NTSC or PAL) for stan-
-              dard (non-widescreen) 4:3 display. Such video  has
-              non-square  pixels;  i.e., its actual widthxheight
 
 
 
@@ -400,6 +400,13 @@
                                  -7-
 
 
+              a mobile platform.
+
+         o    Auto  aspect:  This  enables a feature meant to be
+              helpful when the video to  be  played  might  have
+              been prepared as DVD-Video (NTSC or PAL) for stan-
+              dard (non-widescreen) 4:3 display. Such video  has
+              non-square  pixels;  i.e., its actual widthxheight
               does not match its intended display  aspect.  With
               this  check  enabled,  the video player will force
               display at 4:3 ratio if the video dimensions match
@@ -447,13 +454,6 @@
               depend on CSS definitions, it  is  ultimately  the
               user's  WordPress theme that provide the effect of
               this option.  For example, if a theme  provides  a
-              left or right margin for the `.widget' class, then
-              this plugin's video widget might not align accord-
-              ing to this option.
-
-
-
-
 
 
 
@@ -465,6 +465,10 @@
 
                                  -8-
 
+
+              left or right margin for the `.widget' class, then
+              this plugin's video widget might not align accord-
+              ing to this option.
 
          o    Video  preload:  This  is  an exclusive selection.
               HTML5 video allows a "preload"  attribute  with  a
@@ -509,13 +513,9 @@
               period, and then pause playback, leaving a visible
               frame to act as a `poster.'
 
-         o    Initial volume: The video player has a volume con-
-              trol that visitors can adjust. This field will set
-              a default volume. If the web browser flash  plugin
-              is permitted to save values locally on a visitor's
-              machine, then their adjustment will be saved,  and
-              will  be  used  rather  than the default when they
-              visit again (or reload the  page).  User  settings
+
+
+
     -----------
       2 In most of the supported video file types, the
     browser  should be able to find the metadata with-
@@ -532,6 +532,13 @@
                                  -9-
 
 
+         o    Initial volume: The video player has a volume con-
+              trol that visitors can adjust. This field will set
+              a default volume. If the web browser flash  plugin
+              is permitted to save values locally on a visitor's
+              machine, then their adjustment will be saved,  and
+              will  be  used  rather  than the default when they
+              visit again (or reload the  page).  User  settings
               are   not   saved   for  the  HTML5  video  player
               presently.
 
@@ -577,15 +584,8 @@
          o    Hide  and  disable control bar: Enable this if the
               media should play through without interruption.
 
-         o    Allow full screen: This enables a control bar but-
-              ton that will place the video in full-screen mode.
 
-         o    Control bar Height (30-60): The control bar height
-              can be adjusted with this. The range 30-60  merely
-              suggests useful sizes; it is not a fixed boundary.
-              A good size would be influenced by  the  specified
-              display  dimensions  on  non-mobile platforms, but
-              also  by  usability  on  mobile  platforms.  Test,
+
 
 
 
@@ -598,6 +598,15 @@
                                 -10-
 
 
+         o    Allow full screen: This enables a control bar but-
+              ton that will place the video in full-screen mode.
+
+         o    Control bar Height (30-60): The control bar height
+              can be adjusted with this. The range 30-60  merely
+              suggests useful sizes; it is not a fixed boundary.
+              A good size would be influenced by  the  specified
+              display  dimensions  on  non-mobile platforms, but
+              also  by  usability  on  mobile  platforms.  Test,
               please.
 
 
@@ -624,15 +633,6 @@
     COPYING,  which should be present in the top-level directory
     of  the  distribution  archive;  or,  see  the  license   at
     http://www.gnu.org/licenses/.
-
-
-
-
-
-
-
-
-
 
 
 
