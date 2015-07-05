@@ -19,14 +19,20 @@
  */
 
 /**
- * WP visual editor presentation of SWFPut video.
+ * TinyMCE plugin to to present the SWFPut shortcode as
+ * as something nicer than the raw code in formatted editor
+ * 
+ * This is for tinymce with major version 4.x and is used
+ * by SWFPut for WP 3.9.x and greater
  * 
  * With v 2.9 (3.0) a new pretty dialog based simplified
  * UI is implemented based on (literally) the wp.media w/
  * Backbone and _'s that WP comments suggest was started
- * ~ v 3.5 -- this implementation is conditional on v >= 4.3.
+ * ~ v 3.5 -- this implementation is conditional on v 4.x.
  * 
- * See, in WP installation, wp-includes/js/{mce-view,media*}.js
+ * wp-includes/js/tinymce/plugins/wpeditimage/editor_plugin_src.js
+ * was used as a guide for this, and copy & paste code may remain.
+ * As WordPress is GPL, this is cool. 
  */
 
 //
@@ -40,6 +46,36 @@ var SWFPut_video_utility_obj_def = function() {
 	// be greater than initial value on next page load --
 	// under such conditions, games over anyway.
 	this.loadtime_serial = this.unixtime() & 0x0FFFFFFFFF;
+
+	// For older tinyMCE display:
+	// placeholder token data: regretable hack for SWFPut video
+	// plugin for the tinymce, with WordPress; this is to hold
+	// place in a <dd> element which normally holds a caption,
+	// but when there is no caption.
+	if ( this._fpo === undefined
+	  && SWFPut_putswf_video_inst !== undefined ) {
+		this.fpo = SWFPut_putswf_video_inst.fpo;
+	} else if ( this.fpo === undefined ) {
+		SWFPut_video_utility_obj_def.prototype._fpo = {};
+		var t = this._fpo;
+		t.cmt = '<!-- do not strip me -->';
+		t.ent = t.cmt;
+		t.enx = t.ent;
+		var eenc = document.createElement('div');
+		eenc.innerHTML = t.ent;
+		t.enc = eenc.textContent || eenc.innerText || t.ent;
+		t.rxs = '((' + t.cmt + ')|(' + t.enx + ')|(' + t.enc + '))';
+		t.rxx = '.*' + t.rxs + '.*';
+		t.is  = function(s, eq) {
+			return s.match(RegExp(eq ? t.rxs : t.rxx));
+		};
+		
+		this.fpo = this._fpo;
+	}
+	
+	// use tinymce plugin, or new _+Backbone-based wp.media mvc code
+	this._bbone_mvc_opt =
+	    swfput_mceplug_inf._bbone_mvc_opt === 'true' ? true : false;
 };
 SWFPut_video_utility_obj_def.prototype = {
 	defprops  : {
@@ -208,25 +244,36 @@ SWFPut_video_utility_obj_def.prototype = {
 var SWFPut_video_utility_obj = 
 	new SWFPut_video_utility_obj_def(wp || false);
 
+// Utility used in plugin
+function SWFPut_repl_nl(str) {
+	return str.replace(
+		/\r\n/g, '\n').replace(
+			/\r/g, '\n').replace(
+				/\n/g, '<br />');
+};
 
-//
+
 // Experimental wp.media based presentation in/of editor thing
-//
+if ( SWFPut_video_utility_obj._bbone_mvc_opt === true
+     && wp !== undefined && wp.mce !== undefined
+     && wp.mce.views !== undefined
+     && wp.mce.views.register !== undefined
+     && typeof wp.mce.views.register === 'function' ) {
 
 // Our button (next to "Add Media") calls this
 var SWFPut_add_button_func = function(btn) {
-	var ivl, ivlmax = 100, tid = btn.id, ed,
+	var ivl, ivlmax = 100, tid = btn.id,
 	    sc = SWFPut_video_utility_obj.get_new_putswf_shortcode(),
 	    dat = SWFPut_putswf_video_inst.get_mce_dat(),
 	    enc = window.encodeURIComponent( sc ),
+	    ed = dat.ed,
 	    div = false;
 
-	if ( ! (dat && dat.ed) ) {
+	if ( ! ed ) {
 		alert('Failed to get visual editor');
 		return false;
 	}
 	
-	ed = dat.ed;
 	ed.selection.setContent( sc + '&nbsp;', {format : 'text'} );
 
 	ivl = setInterval( function() {
@@ -295,6 +342,7 @@ var SWFPut_cache_shortcode_ids = function(sc, cb) {
 			_.each(s.split('|'), function(t) {
 				var m = t.match(/^[ \t]*([0-9]+)[ \t]*$/);
 				if ( m && m[1] ) {
+					//aid.push(m[1]);
 					var res = SWFPut_get_attachment_by_id(m[1], false, _cb);
 					
 					if ( res !== null && _cb !== false ) {
@@ -441,319 +489,677 @@ var SWFPut_get_iframe_document = function(head, styles, bodcls, body) {
 	var media = wp.media,
 		baseSettings = SWFPut_video_utility_obj.defprops,
 		l10n = typeof _wpMediaViewsL10n === 'undefined' ? {} : _wpMediaViewsL10n,
-	    mce  = wp.mce,
-	    dbg  = true;
+	    mce			= wp.mce,
+	    av			= (mce.av && mce.av.View) ? mce.av.View : false,
+	    v42			= false, dbg = true;
 
-	var M = { // ...edia
-		state: [],
+	if ( av === false ) {
+		v42 = true;
+		var M = { // ...edia
+			state: [],
+		
+			// setIframes copied from mce-view.js for broken call
+			// to MutationObserver.observe() --
+			// arg 1 was iframeDoc.body but body lacks interface Node
+			// and more importantly we need to control the markup
+			// written into the iframe document
+			setIframes: function ( head, body, callback, rendered ) {
+				var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver,
+					self = this;
 	
-		// setIframes copied from mce-view.js for broken call
-		// to MutationObserver.observe() --
-		// arg 1 was iframeDoc.body but body lacks interface Node
-		// and more importantly we need to control the markup
-		// written into the iframe document
-		setIframes: function ( head, body, callback, rendered ) {
-			var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver,
-				self = this;
-
-			this.getNodes( function( editor, node, contentNode ) {
-				var dom = editor.dom,
-					styles = '',
-					bodyClasses = editor.getBody().className || '',
-					editorHead = editor.getDoc().getElementsByTagName( 'head' )[0];
-
-				tinymce.each( dom.$( 'link[rel="stylesheet"]', editorHead ), function( link ) {
-					if ( link.href && link.href.indexOf( 'skins/lightgray/content.min.css' ) === -1 &&
-						link.href.indexOf( 'skins/wordpress/wp-content.css' ) === -1 ) {
-
-						styles += dom.getOuterHTML( link );
-					}
-				} );
-
-				// Seems the browsers need a bit of time to insert/set the view nodes,
-				// or the iframe will fail especially when switching Text => Visual.
-				setTimeout( function() {
-					var iframe, iframeDoc, observer, i;
-
-					contentNode.innerHTML = '';
-
-					iframe = dom.add( contentNode, 'iframe', {
-						/* jshint scripturl: true */
-						src: tinymce.Env.ie ? 'javascript:""' : '',
-						frameBorder: '0',
-						allowTransparency: 'true',
-						scrolling: 'no',
-						'class': 'wpview-sandbox',
-						style: {
-							width: '100%',
-							display: 'block'
+				this.getNodes( function( editor, node, contentNode ) {
+					var dom = editor.dom,
+						styles = '',
+						bodyClasses = editor.getBody().className || '',
+						editorHead = editor.getDoc().getElementsByTagName( 'head' )[0];
+	
+					tinymce.each( dom.$( 'link[rel="stylesheet"]', editorHead ), function( link ) {
+						if ( link.href && link.href.indexOf( 'skins/lightgray/content.min.css' ) === -1 &&
+							link.href.indexOf( 'skins/wordpress/wp-content.css' ) === -1 ) {
+	
+							styles += dom.getOuterHTML( link );
 						}
 					} );
+	
+					// Seems the browsers need a bit of time to insert/set the view nodes,
+					// or the iframe will fail especially when switching Text => Visual.
+					setTimeout( function() {
+						var iframe, iframeDoc, observer, i;
+	
+						contentNode.innerHTML = '';
+	
+						iframe = dom.add( contentNode, 'iframe', {
+							/* jshint scripturl: true */
+							src: tinymce.Env.ie ? 'javascript:""' : '',
+							frameBorder: '0',
+							allowTransparency: 'true',
+							scrolling: 'no',
+							'class': 'wpview-sandbox',
+							style: {
+								width: '100%',
+								display: 'block'
+							}
+						} );
+	
+						dom.add( contentNode, 'div', { 'class': 'wpview-overlay' } );
+	
+						iframeDoc = iframe.contentWindow.document;
 
-					dom.add( contentNode, 'div', { 'class': 'wpview-overlay' } );
+						iframeDoc.open();
+						iframeDoc.write(
+							SWFPut_get_iframe_document( head, styles, bodyClasses, body )
+						);
+						iframeDoc.close();
 
-					iframeDoc = iframe.contentWindow.document;
-
-					iframeDoc.open();
-					iframeDoc.write(
-						SWFPut_get_iframe_document( head, styles, bodyClasses, body )
-					);
-					iframeDoc.close();
-
-					function resize() {
-						var $iframe, iframeDocHeight;
-
-						// Make sure the iframe still exists.
-						if ( iframe.contentWindow ) {
-							$iframe = $( iframe );
-							iframeDocHeight = $( iframeDoc.body ).height();
-
-							if ( $iframe.height() !== iframeDocHeight ) {
-								$iframe.height( iframeDocHeight );
-								editor.nodeChanged();
+						function resize() {
+							var $iframe, iframeDocHeight;
+	
+							// Make sure the iframe still exists.
+							if ( iframe.contentWindow ) {
+								$iframe = $( iframe );
+								iframeDocHeight = $( iframeDoc.body ).height();
+	
+								if ( $iframe.height() !== iframeDocHeight ) {
+									$iframe.height( iframeDocHeight );
+									editor.nodeChanged();
+								}
 							}
 						}
-					}
-
-					$( iframe.contentWindow ).on( 'load', resize );
-
-					if ( MutationObserver ) {
-						var n = iframeDoc; // iframeDoc.body // WP core bug -- had body
-						observer = new MutationObserver( _.debounce( resize, 100 ) );
-
-						observer.observe( n, {
-							attributes: true,
-							childList: true,
-							subtree: true
-						} );
-
-						$( node ).one( 'wp-mce-view-unbind', function() {
-							observer.disconnect();
-						} );
-					} else {
-						for ( i = 1; i < 6; i++ ) {
-							setTimeout( resize, i * 700 );
+	
+						$( iframe.contentWindow ).on( 'load', resize );
+	
+						if ( MutationObserver ) {
+							var n = iframeDoc; // iframeDoc.body // WP core bug -- had body
+							observer = new MutationObserver( _.debounce( resize, 100 ) );
+	
+							observer.observe( n, {
+								attributes: true,
+								childList: true,
+								subtree: true
+							} );
+	
+							$( node ).one( 'wp-mce-view-unbind', function() {
+								observer.disconnect();
+							} );
+						} else {
+							for ( i = 1; i < 6; i++ ) {
+								setTimeout( resize, i * 700 );
+							}
 						}
-					}
+	
+						function classChange() {
+							iframeDoc.body.className = editor.getBody().className;
+						}
+	
+						editor.on( 'wp-body-class-change', classChange );
+	
+						$( node ).one( 'wp-mce-view-unbind', function() {
+							editor.off( 'wp-body-class-change', classChange );
+						} );
+	
+						callback && callback.call( self, editor, node, contentNode );
+					}, 50 );
+				}, rendered );
+			},
 
-					function classChange() {
-						iframeDoc.body.className = editor.getBody().className;
-					}
+			// Sad hack: the replaceMarkers in wp.mce.view is overriden
+			// because it fails when our captions have markup elements,
+			// but in addition whitespace differs, so naive comps will
+			// fail, and additionally in addition tinymce cannot refrain
+			// from diddling with the elements and adds attributes that
+			// cause comp fail; therefore, this string prep. function
+			marker_comp_prepare: function(str) {
+				var ostr,
+				    rx1 = /[ \t]*data-mce[^=]*="[^"]*"/g,
+				    rx2 = /[ \t]{2,}/g;
 
-					editor.on( 'wp-body-class-change', classChange );
-
-					$( node ).one( 'wp-mce-view-unbind', function() {
-						editor.off( 'wp-body-class-change', classChange );
-					} );
-
-					callback && callback.call( self, editor, node, contentNode );
-				}, 50 );
-			}, rendered );
-		},
-
-		// Sad hack: the replaceMarkers in wp.mce.view is overriden
-		// because it fails when our captions have markup elements,
-		// but in addition whitespace differs, so naive comps will
-		// fail, and additionally in addition tinymce cannot refrain
-		// from diddling with the elements and adds attributes that
-		// cause comp fail; therefore, this string prep. function
-		marker_comp_prepare: function(str) {
-			var ostr,
-			    rx1 = /[ \t]*data-mce[^=]*="[^"]*"/g,
-			    rx2 = /[ \t]{2,}/g;
-
-			if ( ostr = str.substr(0).replace( rx1, '' ) ) {
-				ostr = ostr.replace( rx2, ' ' );
-			}
-
-			return ostr || str;
-		},
-
-		/**
-		 * Replaces all marker nodes tied to this view instance.
-		 * 
-		 * EH: override here due to naive comparision that fails
-		 * when captions have markup
-		 */
-		replaceMarkers: function() {
-			this.getMarkers( function( editor, node ) {
-				var c1 = M.marker_comp_prepare( $( node ).html() ),
-				    c2 = M.marker_comp_prepare( this.text );
-
-				if ( ! this.loader && c1 !== c2 ) {
-					editor.dom.setAttrib( node, 'data-wpview-marker', null );
-					return;
+				if ( ostr = str.substr(0).replace( rx1, '' ) ) {
+					ostr = ostr.replace( rx2, ' ' );
 				}
 
-				editor.dom.replace(
-					editor.dom.createFragment(
-						'<div class="wpview-wrap" data-wpview-text="' + this.encodedText + '" data-wpview-type="' + this.type + '">' +
-							'<p class="wpview-selection-before">\u00a0</p>' +
-							'<div class="wpview-body" contenteditable="false">' +
-								'<div class="wpview-content wpview-type-' + this.type + '"></div>' +
-							'</div>' +
-							'<p class="wpview-selection-after">\u00a0</p>' +
-						'</div>'
-					),
-					node
-				);
-			} );
-		},
+				return ostr || str;
+			},
 
-		/**
-		 * Tries to find a text match in a given string.
-		 *
-		 * @param {String} content The string to scan.
-		 *
-		 * @return {Object}
-		 * 
-		 * EH: originally overridden for debugging, now
-		 * kept in place to add capencoded= to attrs
-		 */
-		match: function( content ) {
-			//var match = wp.shortcode.next( this.type, content );
-			var rx = /\[(\[?)(putswf_video)(?![\w-])([^\]\/]*(?:\/(?!\])[^\]\/]*)*?)(?:(\/)\]|\](?:([^\[]*(?:\[(?!\/\2\])[^\[]*)*)(\[\/\2\]))?)(\]?)/g,
-			    match = rx.exec( content );
+			/**
+			 * Replaces all marker nodes tied to this view instance.
+			 * 
+			 * EH: override here due to naive comparision that fails
+			 * when captions have markup
+			 */
+			replaceMarkers: function() {
+				this.getMarkers( function( editor, node ) {
+					var c1 = M.marker_comp_prepare( $( node ).html() ),
+					    c2 = M.marker_comp_prepare( this.text );
 
-			if ( match ) {
-				var c1, c2;
+					if ( c1 !== c2 ) {
+						editor.dom.setAttrib( node, 'data-wpview-marker', null );
+						return;
+					}
+	
+					editor.dom.replace(
+						editor.dom.createFragment(
+							'<div class="wpview-wrap" data-wpview-text="' + this.encodedText + '" data-wpview-type="' + this.type + '">' +
+								'<p class="wpview-selection-before">\u00a0</p>' +
+								'<div class="wpview-body" contenteditable="false">' +
+									'<div class="wpview-content wpview-type-' + this.type + '"></div>' +
+								'</div>' +
+								'<p class="wpview-selection-after">\u00a0</p>' +
+							'</div>'
+						),
+						node
+					);
+				} );
+			},
 
-				c1 = ' capencoded="' + encodeURIComponent(match[5]) + '"';
-				c2 = match[3].indexOf(' capencoded=');
-				if ( c2 < 0 ) {
-					c2 = match[3] + c1;
-				} else {
-					c2 = match[3].replace(/ capencoded="[^"]*"/g, c1);
+			/**
+			 * Tries to find a text match in a given string.
+			 *
+			 * @param {String} content The string to scan.
+			 *
+			 * @return {Object}
+			 * 
+			 * EH: originally overridden for debugging, now
+			 * kept in place to add capencoded= to attrs
+			 */
+			match: function( content ) {
+				//var match = wp.shortcode.next( this.type, content );
+				var rx = /\[(\[?)(putswf_video)(?![\w-])([^\]\/]*(?:\/(?!\])[^\]\/]*)*?)(?:(\/)\]|\](?:([^\[]*(?:\[(?!\/\2\])[^\[]*)*)(\[\/\2\]))?)(\]?)/g,
+				    match = rx.exec( content );
+
+				if ( match ) {
+					var c1, c2;
+
+					c1 = ' capencoded="' + encodeURIComponent(match[5]) + '"';
+					c2 = match[3].indexOf(' capencoded=');
+					if ( c2 < 0 ) {
+						c2 = match[3] + c1;
+					} else {
+						c2 = match[3].replace(/ capencoded="[^"]*"/g, c1);
+					}
+					
+					return {
+						index: match.index,
+						content: match[0],
+						options: {
+							shortcode: new wp.shortcode({
+								tag:     match[2],
+								attrs:   c2,
+								type:    match[6] ? 'closed' : 'single',
+								content: match[5]
+							})
+						}
+					};
+				}
+			},
+
+			edit: function( text, update ) {
+				var media = wp.media[ this.type ],
+					frame = media.edit( text );
+	
+				this.pausePlayers && this.pausePlayers();
+	
+				_.each( this.state, function( state ) {
+					frame.state( state ).on( 'update', function( selection ) {
+						var s = media.shortcode( selection ).string()
+						update( s );
+					} );
+				} );
+	
+				frame.on( 'close', function() {
+					frame.detach();
+				} );
+	
+				frame.open();
+			}
+		};
+
+		var V = _.extend( {}, M, { // ...ideo
+			action: 'parse_putswf_video_shortcode',
+
+			initialize: function() {
+				var self = this;
+				
+				this.fetch();
+				
+				this.getEditors( function( editor ) {
+					editor.on( 'wpview-selected', function() {
+						self.pausePlayers();
+					} );
+				} );
+			},
+
+			fetch: function () {
+				var self = this,
+				    atts = SWFPut_video_utility_obj.atts_filter(
+				        this.shortcode.attrs.named),
+				    sc =
+				        SWFPut_video_utility_obj.mk_shortcode(
+				            this.shortcode.tag,
+				            atts,
+				            this.shortcode.content),
+				    ng = this.shortcode.string();
+
+				wp.ajax.send( this.action, {
+					data: {
+						post_ID: $( '#post_ID' ).val() || 0,
+						type: this.shortcode.tag,
+						shortcode: sc
+					}
+				} )
+				.done( function( response ) {
+					self.render( response );
+				} )
+				.fail( function( response ) {
+					if ( self.url ) {
+						self.removeMarkers();
+					} else {
+						self.setError( response.message || response.statusText, 'admin-media' );
+					}
+				} );
+			},
+
+			stopPlayers: function( event_arg ) {
+				var rem = event_arg; // might be Event or string
+
+				this.getNodes( function( editor, node, content ) {
+					var p, win,
+						iframe = $( 'iframe.wpview-sandbox', content ).get(0);
+
+					if ( iframe && ( win = iframe.contentWindow ) && win.evhh5v_sizer_instances ) {
+						try {
+							for ( p in win.evhh5v_sizer_instances ) {
+								var vi = win.evhh5v_sizer_instances[p],
+								    v = vi.va_o || false, // H5V
+								    f = vi.o    || false, // flash
+								    act = (event_arg === 'pause')
+								        ? 'pause' : 'stop';
+
+								// use 'stop()' or 'pause()'
+								// the latter is gentler
+								if ( v && (typeof v[act] === 'function') ) {
+									v[act]();
+								}
+								if ( f && (typeof f[act] === 'function') ) {
+									f[act]();
+								}
+							}
+						} catch( err ) {
+							var e = err.message;
+						}
+						
+						if ( rem === 'remove' ) {
+							iframe.contentWindow = null;
+							iframe = null;
+						}
+					}
+				});
+			},
+
+			pausePlayers: function() {
+				this.stopPlayers && this.stopPlayers( 'pause' );
+			},
+
+        } );
+
+		mce.views.register( 'putswf_video', _.extend( {}, V, {
+			state: [ 'putswf_video-details' ]
+		} ) );
+	
+	} else {
+		// devl up to 4.1.1 -- keep for short time:
+		var view_def = mce.putswfMixin = {
+			View: _.extend( {}, av, {
+				overlay: true,
+	
+				action: 'parse_putswf_video_shortcode',
+	
+				initialize: function( options ) {
+					var self = this;
+	
+					if ( options && options.shortcode ) {
+						console.log('VIEW OPTIONS SHORTCODE: ' + options.shortcode);
+						this.shortcode = options.shortcode;
+					}
+					this.cache_shortcode_ids(this.shortcode);
+	
+					_.bindAll( this, 'setIframes', 'setNodes', 'fetch', 'stopPlayers' );
+					$( this ).on( 'ready', this.setNodes );
+	                
+					$( document ).on( 'media:edit', this.stopPlayers );
+	
+					this.fetch();
+	
+					this.getEditors( function( editor ) {
+						editor.on( 'hide', self.stopPlayers );
+						//editor.on( 'wpview-selected', function() {
+						//	self.pausePlayers();
+						//} );
+					});
+				},
+				
+				// specific to putswf shortcode attr url and altvideo.
+				// and iimage -- these might have a URL or WP
+				// attachment ID -- in the latter case get the
+				// wp "attachment" object w/ ajax and cache the
+				// objs for later use
+				cache_shortcode_ids: SWFPut_cache_shortcode_ids,
+	
+				// setIframes copied from mce-view.js for broken call
+				// to MutationObserver.observe() --
+				// arg 1 was iframeDoc.body but body lacks interface Node,
+				// passing iframeDoc works (Document implements Node)
+				// -- copy is good because e.g. can add styles
+				setIframes: function ( head, body ) {
+					var MutationObserver = window.MutationObserver
+						|| window.WebKitMutationObserver
+						|| window.MozMutationObserver || false,
+						importStyles = true,
+						ivlmax = 180, ivl;
+		
+					if ( head || body.indexOf( '<script' ) !== -1 ) {
+						this.getNodes( function ( editor, node, content ) {
+							var dom = editor.dom,
+								styles = '',
+								bodyClasses = editor.getBody().className || '',
+								iframe, iframeDoc, i, resize;
+		
+							content.innerHTML = '';
+							head = head || '';
+		
+							if ( importStyles ) {
+								if ( ! wp.mce.views.sandboxStyles ) {
+									tinymce.each( dom.$( 'link[rel="stylesheet"]', editor.getDoc().head ), function( link ) {
+										if ( link.href && link.href.indexOf( 'skins/lightgray/content.min.css' ) === -1 &&
+											link.href.indexOf( 'skins/wordpress/wp-content.css' ) === -1 ) {
+		
+											styles += dom.getOuterHTML( link ) + '\n';
+										}
+									});
+		
+									wp.mce.views.sandboxStyles = styles;
+								} else {
+									styles = wp.mce.views.sandboxStyles;
+								}
+							}
+		
+							// Seems Firefox needs a bit of time to insert/set the view nodes, or the iframe will fail
+							// especially when switching Text => Visual.
+							setTimeout( function() {
+							ivl = setInterval( function() {
+								if ( --ivlmax <= 0 ) {
+									clearInterval(ivl);
+									return;
+								}
+								
+								iframe = dom.add( content, 'iframe', {
+									src: tinymce.Env.ie ? 'javascript:""' : '',
+									frameBorder: '0',
+									allowTransparency: 'true',
+									scrolling: 'no',
+									'class': 'wpview-sandbox',
+									style: {
+										width: '100%',
+										display: 'block'
+									}
+								} ) || false;
+								
+								if ( ! iframe ) {
+									return;
+								}
+		
+								// got iframe; now, use inner interval
+								// to wait for iframe.contentWindow
+								clearInterval(ivl);
+								ivlmax *= 4; // 4x freq., same dur.
+								ivl = setInterval( function() {
+									if ( --ivlmax <= 0 ) {
+										clearInterval(ivl);
+										return;
+									}
+								
+									iframeDoc =
+									    iframe.contentWindow
+									    ? (iframe.contentWindow.document || false)
+									    : false;
+	
+									if ( ! iframeDoc ) {
+										return;
+									}
+			
+									iframeDoc.open();
+									iframeDoc.write(
+										SWFPut_get_iframe_document( head, styles, bodyClasses, body )
+									);
+									iframeDoc.close();
+			
+									resize = function() {
+										var h;
+										// Make sure the iframe still exists.
+										if ( ! iframe.contentWindow ) {
+											return;
+										}
+										h = $( iframeDoc.body ).height();
+										$( iframe ).height( h );
+									};
+			
+									try {
+										if ( MutationObserver ) {
+											//was iframeDoc.body -- not a Node iface (FFox);
+											var nod = iframeDoc;
+		
+											new MutationObserver( _.debounce( function() {
+												resize();
+											}, 100 ) )
+											.observe( nod, {
+												attributes: true,
+												childList: true,
+												subtree: true
+											} );
+										} else {
+											throw ReferenceError('MutationObserver not supported');
+										}
+									} catch ( exptn ) {
+										if ( exptn.message.length > 0 ) {
+											console.log('Exception: ' + exptn.message);
+										}
+										for ( i = 1; i < 36; i++ ) {
+											setTimeout( resize, 1000 );
+										}
+									}
+			
+									if ( importStyles ) {
+										editor.on( 'wp-body-class-change', function() {
+											iframeDoc.body.className = editor.getBody().className;
+										});
+									}
+									
+									clearInterval(ivl);
+								}, 250); // inner interval
+							}, 1000 ); // interval
+	 						}, 100 ); // initial timer
+						});
+					} else {
+					       this.setContent( body );
+					}
+				}
+	            ,
+				setNodes: function () {
+						if ( this.parsed ) {
+								this.setIframes( this.parsed.head, this.parsed.body );
+						} else {
+								this.fail();
+						}
+				}
+				,
+				fetch: function () {
+					var self = this,
+					    atts = SWFPut_video_utility_obj.atts_filter(
+					        this.shortcode.attrs.named),
+					    sc =
+					        SWFPut_video_utility_obj.mk_shortcode(
+					            this.shortcode.tag,
+					            atts,
+					            this.shortcode.content),
+					    ng = this.shortcode.string();
+	
+					wp.ajax.send( this.action, {
+						data: {
+							post_ID: $( '#post_ID' ).val() || 0,
+							type: this.shortcode.tag,
+							shortcode: sc
+						}
+					} )
+					.done( function( response ) {
+						if ( response ) {
+							self.parsed = response;
+							self.setIframes( response.head, response.body );
+						} else {
+							self.fail( true );
+						}
+					} )
+					.fail( function( response ) {
+						self.fail( response || true );
+					} );
+				}
+				/**/,
+				fail: function( error ) {
+						if ( ! this.error ) {
+								if ( error ) {
+										this.error = error;
+								} else {
+										return;
+								}
+						}
+	
+						if ( this.error.message ) {
+								if ( ( this.error.type === 'not-embeddable' && this.type === 'embed' ) || this.error.type === 'not-ssl' ||
+										this.error.type === 'no-items' ) {
+	
+										this.setError( this.error.message, 'admin-media' );
+								} else {
+										this.setContent( '<p>' + this.original + '</p>', 'replace' );
+								}
+						} else if ( this.error.statusText ) {
+								this.setError( this.error.statusText, 'admin-media' );
+						} else if ( this.original ) {
+								this.setContent( '<p>' + this.original + '</p>', 'replace' );
+						}
+				},
+	
+				// static
+				stopPlayers: function( event_arg ) {
+					var rem = event_arg; // might be Event or string
+	
+					this.getNodes( function( editor, node, content ) {
+						var p, win,
+							iframe = $( 'iframe.wpview-sandbox', content ).get(0);
+	
+						if ( iframe && ( win = iframe.contentWindow ) && win.evhh5v_sizer_instances ) {
+							try {
+								for ( p in win.evhh5v_sizer_instances ) {
+									var vi = win.evhh5v_sizer_instances[p],
+									    v = vi.va_o || false, // H5V
+									    f = vi.o    || false, // flash
+									    act = (event_arg === 'pause')
+									        ? 'pause' : 'stop';
+	
+									// use 'stop()' or 'pause()'
+									// the latter is gentler
+									if ( v && (typeof v[act] === 'function') ) {
+										v[act]();
+									}
+									if ( f && (typeof f[act] === 'function') ) {
+										f[act]();
+									}
+								}
+							} catch( err ) {
+								var e = err.message;
+							}
+							
+							if ( rem === 'remove' ) {
+								iframe.contentWindow = null;
+								iframe = null;
+							}
+						}
+					});
+				},
+	
+				pausePlayers: function() {
+					this.stopPlayers && this.stopPlayers( 'pause' );
+				},
+	
+				unbind: function() {
+					this.stopPlayers && this.stopPlayers( 'remove' );
+				},
+	
+			})
+		}; // var view_def	= mce.putswfMixin = {
+	
+		mce.views.register( 'putswf_video', _.extend( {}, view_def, {
+	
+			state: 'putswf_video-details',
+	
+			toView: function( content ) {
+			console.log('VIEW toView, content ' + content);
+				var match = wp.shortcode.next( this.type, content );
+	        
+				if ( ! match ) {
+					return;
 				}
 				
 				return {
 					index: match.index,
-					content: match[0],
+					content: match.content,
 					options: {
-						shortcode: new wp.shortcode({
-							tag:     match[2],
-							attrs:   c2,
-							type:    match[6] ? 'closed' : 'single',
-							content: match[5]
-						})
+						shortcode: match.shortcode,
 					}
 				};
-			}
-		},
-
-		edit: function( text, update ) {
-			var media = wp.media[ this.type ],
-				frame = media.edit( text );
-
-			this.pausePlayers && this.pausePlayers();
-
-			_.each( this.state, function( state ) {
-				frame.state( state ).on( 'update', function( selection ) {
-					var s = media.shortcode( selection ).string()
-					update( s );
-				} );
-			} );
-
-			frame.on( 'close', function() {
-				frame.detach();
-			} );
-
-			frame.open();
-		}
-	};
-
-	var V = _.extend( {}, M, { // ...ideo
-		action: 'parse_putswf_video_shortcode',
-
-		initialize: function() {
-			var self = this;
-			
-			this.fetch();
-			
-			this.getEditors( function( editor ) {
-				editor.on( 'wpview-selected', function() {
-					self.pausePlayers();
-				} );
-			} );
-		},
-
-		fetch: function () {
-			var self = this,
-			    atts = SWFPut_video_utility_obj.atts_filter(
-			        this.shortcode.attrs.named),
-			    sc =
-			        SWFPut_video_utility_obj.mk_shortcode(
-			            this.shortcode.tag,
-			            atts,
-			            this.shortcode.content),
-			    ng = this.shortcode.string();
-
-			wp.ajax.send( this.action, {
-				data: {
-					post_ID: $( '#post_ID' ).val() || 0,
-					type: this.shortcode.tag,
-					shortcode: sc
-				}
-			} )
-			.done( function( response ) {
-				self.render( response );
-			} )
-			.fail( function( response ) {
-				if ( self.url ) {
-					self.removeMarkers();
-				} else {
-					self.setError( response.message || response.statusText, 'admin-media' );
-				}
-			} );
-		},
-
-		stopPlayers: function( event_arg ) {
-			var rem = event_arg; // might be Event or string
-
-			this.getNodes( function( editor, node, content ) {
-				var p, win,
-					iframe = $( 'iframe.wpview-sandbox', content ).get(0);
-
-				if ( iframe && ( win = iframe.contentWindow ) && win.evhh5v_sizer_instances ) {
-					try {
-						for ( p in win.evhh5v_sizer_instances ) {
-							var vi = win.evhh5v_sizer_instances[p],
-							    v = vi.va_o || false, // H5V
-							    f = vi.o    || false, // flash
-							    act = (event_arg === 'pause')
-							        ? 'pause' : 'stop';
-
-							// use 'stop()' or 'pause()'
-							// the latter is gentler
-							if ( v && (typeof v[act] === 'function') ) {
-								v[act]();
-							}
-							if ( f && (typeof f[act] === 'function') ) {
-								f[act]();
-							}
-						}
-					} catch( err ) {
-						var e = err.message;
-					}
-					
-					if ( rem === 'remove' ) {
-						iframe.contentWindow = null;
-						iframe = null;
-					}
-				}
-			});
-		},
-
-		pausePlayers: function() {
-			this.stopPlayers && this.stopPlayers( 'pause' );
-		},
-
-	} );
-
-	mce.views.register( 'putswf_video', _.extend( {}, V, {
-		state: [ 'putswf_video-details' ]
-	} ) );
+			},
 	
+			/**
+			 * Called when a TinyMCE view is clicked for editing.
+			 * - Parses the shortcode out of the element's data attribute
+			 * - Calls the `edit` method on the shortcode model
+			 * - Launches the model window
+			 * - Bind's an `update` callback which updates the element's data attribute
+			 *   re-renders the view
+			 *
+			 * @param {HTMLElement} node
+			 */
+			edit: function( node ) {
+				var media = wp.media[ this.type ],
+					self = this,
+					frame, data, callback;
+				$( document ).trigger( 'media:edit' );
+			console.log('VIEW-sub EDIT, type ' + media);
+	        
+				data = window.decodeURIComponent( $( node ).attr('data-wpview-text') );
+				frame = media.edit( data );
+				frame.on( 'close', function() {
+					frame.detach();
+				} );
+	        
+				callback = function( selection ) {
+					var shortcode = wp.media[ self.type ].shortcode( selection ).string();
+					//var shortcode = wp.media[ self.type ].shortcode( selection );
+					$( node ).attr( 'data-wpview-text', window.encodeURIComponent( shortcode ) );
+					wp.mce.views.refreshView( self, shortcode );
+					frame.detach();
+				};
+	        
+				if ( _.isArray( self.state ) ) {
+					_.each( self.state, function (state) {
+						frame.state( state ).on( 'update', callback );
+					} );
+				} else {
+					frame.state( self.state ).on( 'update', callback );
+				}
+	        
+				frame.open();
+			}
+		} ) ); // mce.views.register( 'putswf_video', _.extend( {}, view_def, {
+
+	} // if v42
 
 	// NOTE: several of the objects below have a 'media' object
 	// usually assigned in initialize() -- but these are not necessarily
@@ -1537,3 +1943,446 @@ var SWFPut_get_iframe_document = function(head, styles, bodcls, body) {
 
 }(wp, jQuery, _, Backbone));
 
+} else { // if ( typeof wp.mce.views.register
+
+// Tried and true, but uses old metabox form
+tinymce.PluginManager.add('swfput_mceplugin', function(editor, plurl) {
+	var Node  = tinymce.html.Node;
+	var ed    = editor;
+	var url   = plurl;
+	var urlfm = url.split('/');
+	var fpo   = SWFPut_video_utility_obj.fpo;
+
+	urlfm[urlfm.length - 1] = 'mce_ifm.php'; // iframe doc
+	urlfm = urlfm.join('/');
+
+	// small lib
+	var strcch = function(s, to_lc) {
+		if ( to_lc ) return s.toLowerCase();
+		return s.toUpperCase();
+	};
+	var str_lc = function(s) { return strcch(s, true); };
+	var str_uc = function(s) { return strcch(s, false); };
+	var strccmp = function(s, c) { return (str_lc(s) === str_lc(c)); };
+	// nodeName comp. is common, and case unreliable
+	var nN_lc = function(n) { return str_lc(n.nodeName); };
+	var nN_uc = function(n) { return str_uc(n.nodeName); };
+	var nNcmp = function(n, c) { return (nN_lc(n) === str_lc(c)); };
+	
+
+	var defs  = SWFPut_video_utility_obj.defprops;
+
+	ed.on('init', function() {
+	});
+
+	// EH copied from wpeditimage
+	ed.on('mousedown', function(e) {
+		var parent;
+
+		if ( nNcmp(e.target, 'iframe')
+			&& (parent = ed.dom.getParent(e.target, 'div.evhTemp')) ) {
+			if ( tinymce.isGecko )
+				ed.selection.select(parent);
+			else if ( tinymce.isWebKit )
+				ed.dom.events.prevent(e);
+		}
+	});
+
+	ed.on('keydown', function(e) {
+		var node, p, n = ed.selection.getNode();
+
+		if ( n.className.indexOf('evh-pseudo') < 0 ) {
+			return true;
+		}
+
+		node = ed.dom.getParent(n, 'div.evhTemp');
+
+		if ( ! node ) {
+			p = 'tinymce, SWFPut plugin: failed dom.getParent()';
+			console.log(p);
+			return false;
+		}
+
+		var vk = tinymce.VK || tinymce.util.VK;
+
+		if ( e.keyCode == vk.ENTER ) {
+			ed.dom.events.cancel(e);
+			p = ed.dom.create('p', null, '\uFEFF');
+			ed.dom.insertAfter(p, node);
+			ed.selection.setCursorLocation(p, 0);
+			return true;
+		}
+
+		if ( nNcmp(n, 'dd') ) {
+			return;
+		}
+
+		var ka = [vk.LEFT, vk.UP, vk.RIGHT, vk.DOWN];
+		if ( ka.indexOf(e.keyCode) >= 0 ) {
+			return true;
+		}
+
+		ed.dom.events.cancel(e);
+		return false;
+	});
+
+	ed.on('preInit', function() {
+		ed.schema.addValidElements('evhfrm[*]');
+		
+		ed.parser.addNodeFilter('evhfrm', function(nodes, name) {
+			for ( var i = 0; i < nodes.length; i++ ) {
+				from_pseudo(nodes[i]);
+			}
+		});
+
+		ed.serializer.addNodeFilter('iframe', function(nodes, name) {
+			for ( var i = 0; i < nodes.length; i++ ) {
+				var cl = nodes[i].attr('class');
+				if ( cl && cl.indexOf('evh-pseudo') >= 0 ) {
+					to_pseudo(nodes[i], name);
+				}
+			}
+		});
+	});
+
+	ed.on('BeforeSetContent', function(o) {
+		if ( true || o.set ) {
+			o.content = ed.SWFPut_Set_code(o.content);
+			ed.nodeChanged();
+		}
+	});
+
+	ed.on('PostProcess', function(o) {
+		if ( o.get ) {
+			o.content = ed.SWFPut_Get_code(o.content);
+		}
+	});
+
+	ed.on('BeforeExecCommand', function(o) {
+		var cmd = o.command;
+
+		if ( cmd == 'mceInsertContent' ) {
+			var node, p, n = ed.selection.getNode();
+
+			if ( n.className.indexOf('evh-pseudo') < 0 ) {
+				return;
+			}
+
+			if ( nNcmp(n, 'dd') ) {
+				return;
+			}
+
+			node = ed.dom.getParent(n, 'div.evhTemp');
+
+			if ( node ) {
+				p = ed.dom.create('p', null, '\uFEFF');
+				ed.dom.insertAfter(p, node);
+				ed.selection.setCursorLocation(p, 0);
+				ed.nodeChanged();
+			}
+		}
+	});
+
+	ed.on('Paste', function(ev) {
+		var n = ed.selection.getNode(),
+			node = ed.dom.getParent(n, 'div.evhTemp');
+		if ( ! node ) { // not ours
+			return true;
+		}
+
+		var d = ev.clipboardData || dom.doc.dataTransfer;
+		if ( ! d ) { // what to do?
+			return true;
+		}
+
+		// get & process text, change to an mce insert
+		var tx = tinymce.isIE ? 'Text' : 'text/plain';
+		var rep = SWFPut_repl_nl(d.getData(tx));
+		// timeout is safer: funny business happens in handlers
+		setTimeout(function() {
+			ed.execCommand('mceInsertContent', false, rep);
+		}, 1);
+
+		// lose the original event
+		ev.preventDefault();
+		return tinymce.dom.Event.cancel(ev);
+	});
+
+	ed.SWFPut_Set_code = function(content) {
+		return parseShortcode(content);
+	};
+
+	ed.SWFPut_Get_code = function(content) {
+		return getShortcode(content);
+	};
+	
+	var sc_map = {};
+	var newkey = function() {
+		var r;
+		do {
+			r = '' + parseInt(32768 * Math.random() + 16384);
+		} while ( r in sc_map );
+		sc_map[r] = {};
+		return r;
+	};
+
+	var from_pseudo = function(node) {
+		if ( ! node ) return node;
+		var w, h, s, id, cl, rep = false;
+		w = node.attr('width');
+		h = node.attr('height');
+		s = node.attr('src');
+		cl = node.attr('class') || '';
+		id = node.attr('id') || '';
+
+		var k = (id !== '') ? (id.split('-'))[1] : false;
+		if ( k ) {
+			if ( k in sc_map && sc_map[k].node ) {
+				rep = sc_map[k].node;
+			}
+		}
+
+		if ( ! rep ) {
+			rep = new Node('iframe', 1);
+			rep.attr({
+				'id' : id,
+				'class' : cl.indexOf('evh-pseudo') >= 0 ? cl : (cl+' evh-pseudo'),
+				'frameborder' : '0', // overdue update v 2.9
+				'width' : w,
+				'height' : h,
+				// Argh!: Chromium 3.4 breaks with the sandbox attr.,
+				// refusing to run scipts in the iframe. Up to 3.3
+				// it was OK. Web search shows that chromium devs
+				// have been dithering about this for some time.
+				// IAC, source is never cross-origin or in any way
+				// unknown. Removed.
+				//'sandbox' : "allow-same-origin allow-pointer-lock allow-scripts",
+				//'allowfullscreen' : '',
+				//'seamless' : '',
+				'src' : s
+			});
+			if ( k && k in sc_map ) {
+				sc_map[k].node = rep;
+			}
+		}
+
+		node.replace(rep);
+		return node;
+	};
+
+	var to_pseudo = function(node, name) {
+		if ( ! node ) return node;
+		var w, h, s, id, cl, rep = false;
+		id = node.attr('id') || '';
+		cl = node.attr('class') || '';
+		if ( cl.indexOf('evh-pseudo') < 0 ) {
+			return;
+		}
+		w = node.attr('width');
+		h = node.attr('height');
+		s = node.attr('src');
+
+		var k = (id !== '') ? (id.split('-'))[1] : false;
+		if ( k ) {
+			if ( k in sc_map && sc_map[k].pnode ) {
+				rep = sc_map[k].pnode;
+			}
+		}
+
+		if ( ! rep ) {
+			rep = new Node('evhfrm', 1);
+			rep.attr({
+				'id' : id,
+				'class' : cl,
+				'width' : w,
+				'height' : h,
+				'src' : s
+			});
+			if ( k && k in sc_map ) {
+				sc_map[k].pnode = rep;
+			}
+		}
+
+		node.replace(rep);
+		return node;
+	};
+
+	var _sc_atts2qs = function(ats, cap) {
+		var dat = {};
+		var qs = '', sep = '', csep = '&amp;';
+
+		for ( var k in defs ) {
+			var v = defs[k];
+			var rx = ' '+k+'="([^"]*)"';
+			rx = new RegExp(rx);
+
+			var p = ats.match(rx);
+			if ( p && p[1] != '' ) {
+				v = p[1];
+			}
+
+			dat[k] = v;
+			switch ( k ) {
+				case 'cssurl':
+				case 'audio':
+				case 'iimgbg':
+				case 'quality':
+				case 'mtype':
+				case 'playpath':
+				case 'classid':
+				case 'codebase':
+					continue;
+				case 'displayaspect':
+					// for new h5 video player vs. old WP plugin
+					dat['aspect'] = v;
+					qs += sep + 'aspect=' + encodeURIComponent(v);
+					sep = csep;
+					break;
+				default:
+					break;
+			}
+
+			qs += sep + k + '=' + encodeURIComponent(v);
+			sep = csep;
+		}
+		
+		if ( swfput_mceplug_inf !== undefined ) {
+			qs += sep
+				+ 'a=' + encodeURIComponent(swfput_mceplug_inf.a)
+				+ csep
+				+ 'i=' + encodeURIComponent(swfput_mceplug_inf.i)
+				+ csep
+				+ 'u=' + encodeURIComponent(swfput_mceplug_inf.u);
+		}
+		
+		dat.qs = qs;
+		dat.caption = cap || '';
+
+		return dat;
+	};
+
+	var _sc_atts2if = function(url, dat, id, cap) {
+		var qs = dat.qs;
+		var w = parseInt(dat.width), h = parseInt(dat.height);
+		var dlw = w + 60, fw = w + 16, fh = h + 16; // ugly
+		var sty = 'width: '+dlw+'px';
+		var att = 'width="'+fw+'" height="'+fh+'" ' +
+			'sandbox="allow-same-origin allow-pointer-lock allow-scripts" ' +
+			''; //'allowfullscreen seamless ';
+		cap = dat.caption;
+
+		if ( cap == '' ) {
+			cap = fpo.ent; //'<!-- do not strip me -->';
+		}
+
+		// for clarity, use separate vars for classes, accepting
+		// slightly more inefficiency in the concatenation chain
+		// [yearning for sprintf()]
+		var cls = ' align' + dat.align;
+		var cldl = 'wp-caption evh-pseudo-dl ' + cls;
+		var cldt = 'wp-caption-dt evh-pseudo-dt';
+		var cldd = 'wp-caption-dd evh-pseudo-dd';
+		// NOTE data-no-stripme="sigh": w/o this, if caption
+		// <dd> is empty, whole <dl> might get stripped out!
+		var r = '';
+		r += '<dl id="dl-'+id+'" class="'+cldl+'" style="'+sty+'">';
+		r += '<dt id="dt-'+id+'" class="'+cldt+'" data-no-stripme="sigh">';
+		r += '<evhfrm id="'+id+'" class="evh-pseudo" '+att+' src="';
+		r += url + '?' + qs;
+		r += '"></evhfrm>';
+		r += '</dt><dd id="dd-'+id+'" class="'+cldd+'">';
+		r += cap + '</dd></dl>';
+		
+		dat.code = r;
+		return dat;
+	};
+
+	var parseShortcode = function(content) {
+		//sc_map = {};
+		var uri = urlfm;
+		
+		return content.replace(
+		/([\r\n]*)?(<p>)?(\[putswf_video([^\]]+)\]([\s\S]*?)\[\/putswf_video\])(<\/p>)?([\r\n]*)?/g
+		, function(a,n1,p1, b,c,e, p2,n2) {
+			var sc = b, atts = c, cap = e;
+			var ky = newkey();
+
+			sc_map[ky] = {};
+			sc_map[ky].sc = sc;
+			sc_map[ky].p1 = p1 || '';
+			sc_map[ky].p2 = p2 || '';
+			sc_map[ky].n1 = n1 || '';
+			sc_map[ky].n2 = n2 || '';
+			
+			var dat = _sc_atts2qs(atts, cap);
+			dat = _sc_atts2if(uri, dat, 'evh-'+ky, cap);
+			var w = dat.width, h = dat.height;
+			var dlw = parseInt(w) + 60; // ugly
+			var cls = 'evhTemp mceIE' + dat.align
+				+ ' align' + dat.align;
+
+			var r = n1 || '';
+			r += p1 || '';
+			r += '<div id="evh-sc-'+ky+'" class="'+cls+'" style="width: '+dlw+'px">';
+			r += dat.code;
+			r += '</div>';
+			r += p2 || '';
+			r += n2 || '';
+
+			return r;
+		});
+	};
+
+	var getShortcode = function(content) {
+		return content.replace(
+		/<div ([^>]*class="evhTemp[^>]*)>((.*?)<\/div>)/g
+		, function(a, att, lazy, cnt) {
+			var ky = att.match(/id="evh-sc-([0-9]+)"/);
+			
+			if ( ky && ky[1] ) {
+				ky = ky[1];
+			} else {
+				return a;
+			}
+
+			var sc = '', p1 = '', p2 = '', n1 = '', n2 = '';
+			if ( sc_map[ky] ) {
+				sc = sc_map[ky].sc || '';
+				p1 = sc_map[ky].p1 || '';
+				p2 = sc_map[ky].p2 || '';
+				n1 = sc_map[ky].n1 || '';
+				n2 = sc_map[ky].n2 || '';
+				if ( cnt ) {
+					cnt = cnt.replace(/([\r\n]|<br[^>]*>)*/, '');
+					var m = /.*<dd[^>]*>(.*)<\/dd>.*/.exec(cnt);
+					if ( m && (m = m[1]) ) {
+						if ( fpo.is(m, 0) ) {
+							m = '';
+						}
+						sc = sc.replace(
+						/^(.*\]).*(\[\/[a-zA-Z0-9_-]+\])$/
+						, function(a, scbase, scclose) {
+							return scbase + m + scclose;
+						});
+						sc_map[ky].sc = sc;
+					}
+				}
+			}
+
+			if ( ! sc || sc === '' ) {
+				return a;
+			}
+
+			return n1 + p1 + sc + p2 + n2;
+		});
+	};
+
+	// ?? found in wpeditimage for tinymce 4.x -- what uses these?
+	return {
+		_do_shcode: parseShortcode,
+		_get_shcode: getShortcode
+	};
+		
+});
+
+} // if ( typeof wp.mce.views.register

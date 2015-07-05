@@ -674,10 +674,13 @@ evhh5v_sizer.prototype = {
 		o.height = ho;
 		o.width  = wo;
 
-		if ( o.pixelHeight !== undefined ) {
-			o.pixelHeight = ho;
-			o.pixelWidth  = wo;
-		}
+		// in try block to suppress browser console nag
+		try {
+			if ( o.pixelHeight !== undefined ) {
+				o.pixelHeight = ho;
+				o.pixelWidth  = wo;
+			}
+		} catch ( ex ) {}
 
 		np = "" + np + 'px';
 		dv.style.paddingLeft  = np;
@@ -2714,6 +2717,8 @@ var evhh5v_controller = function(vid, ctlbar, pad) {
 	this.pad = pad;
 	this.handlermap = {};
 
+	this._x = this._y = 0;
+
 	this.auxdiv = document.getElementById(this.ctlbar["auxdiv"]);
 	this.bardiv = document.getElementById(this.ctlbar["ctlbardiv"]);
 	this.div_bg_clr = evhh5v_getstyle(this.auxdiv, 'background-color');
@@ -3285,8 +3290,10 @@ evhh5v_controller.prototype = {
 		t.style.left = this.pad + "px";
 	},
 	// these are for the resizing JS that handles this; no effect
-	get pixelWidth() { return this.v.pixelWidth; }, set pixelWidth(v) { this.v.pixelWidth = v; },
-	get pixelHeight() { return this.v.pixelHeight; }, set pixelHeight(v) { this.v.pixelHeight = v; },
+	get pixelWidth() { if ( this.v.pixelWidth !== undefined ) return this.v.pixelWidth; return undefined; },
+	set pixelWidth(v) { this.v.pixelWidth = v; },
+	get pixelHeight() { if ( this.v.pixelHeight !== undefined ) return this.v.pixelHeight; return undefined; },
+	set pixelHeight(v) { this.v.pixelHeight = v; },
 
 	// size hack for going fullscreen -- it is the enclosing div that
 	// is fullscreen'd, and here we follow

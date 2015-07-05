@@ -3,7 +3,7 @@
 Plugin Name: SWFPut
 Plugin URI: http://agalena.nfshost.com/b1/swfput-html5-flash-wordpress-plugin
 Description: Add Flash and HTML5 video to WordPress posts, pages, and widgets, from arbitrary URI's or media library ID's or files in your media upload directory tree (including uploads not in the WordPress media library).
-Version: 3.0
+Version: 3.0.1
 Author: Ed Hynan
 Author URI: http://agalena.nfshost.com/b1/
 License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
@@ -113,7 +113,7 @@ class SWF_put_evh {
 	const plugin_webpage = 'http://agalena.nfshost.com/b1/swfput-html5-flash-wordpress-plugin';
 	
 	// this version
-	const plugin_version = '3.0';
+	const plugin_version = '3.0.1';
 	
 	// the widget class name
 	const swfput_widget = 'SWF_put_widget_evh';
@@ -231,6 +231,7 @@ class SWF_put_evh {
 	const swfxedjsname = 'formxed.min.js';
 	// swfput js shortcode editor helper name
 	const swfxpljsname = 'editor_plugin.min.js';
+	const swfxpljsname42 = 'editor_plugin42.min.js'; // wp 4.[0-2]
 	const swfxpljsname3x = 'editor_plugin3x.min.js';
 	// starting wp 4.1, swfput 2.9 -- using WP media _.Backbone stuff
 	// 'wpmt' for wp media template
@@ -857,11 +858,19 @@ class SWF_put_evh {
 
 	// filter to add mce plugin javascript
 	public static function add_mceplugin_js($plugin_array) {
+		// wp.mce editor js is moving target 4.[0-3]
 		// tinymce major version 4 begins in WP 3.9
 		$v = (3 << 24) | (9 << 16) | (0 << 8) | 0;
 		$shiny = self::wpv_min($v);
 		
-		$jsfile = $shiny ? self::swfxpljsname : self::swfxpljsname3x;
+		if ( $shiny ) {
+			$v = (4 << 24) | (3 << 16) | (0 << 8) | 0;
+			$shiny = self::wpv_min($v);
+		
+			$jsfile = $shiny ? self::swfxpljsname : self::swfxpljsname42;
+		} else {
+			$jsfile = self::swfxpljsname3x;
+		}
 
 		$pf = self::mk_pluginfile();
 		$pname = 'swfput_mceplugin';
@@ -1073,12 +1082,20 @@ class SWF_put_evh {
 
 	// add link at plugins page entry for the settings page
 	public static function plugin_page_addlink($links) {
-		$opturl = '<a href="' . get_option('siteurl');
-		$opturl .= '/wp-admin/options-general.php?page=';
-		$opturl .= self::settings_page_id;
-		$opturl .= '">' . __('Settings', 'swfput_l10n') . '</a>';
-		// Add a link to this plugin's settings page
-		array_unshift($links, $opturl); 
+		// Add a link to this plugin's settings page --
+		// up to v 3.0 bug: get_option('siteurl') was used to
+		// build value with hardcoded path fragments -- N.G.,
+		// might not have been full URL w/ https, etc.,
+		// menu_page_url(), added after 3.0, fixes that.
+		$opturl = menu_page_url(self::settings_page_id, false);
+
+		if ( $opturl ) {
+			$opturl = sprintf('<a href="%s">%s</a>',
+			    $opturl,
+			    __('Settings', 'swfput_l10n')
+			);
+			array_unshift($links, $opturl); 
+		}
 		return $links; 
 	}
 
