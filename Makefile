@@ -1,7 +1,7 @@
 #! /usr/bin/make -f
 # License: GNU GPLv3 (see http://www.gnu.org/licenses/gpl-3.0.html)
 
-PRJVERS = 3.0
+PRJVERS = 3.0.1
 PRJSTEM = swfput
 PRJNAME = $(PRJSTEM)-$(PRJVERS)
 
@@ -31,8 +31,8 @@ POTSRCS = ${PRJSTEM}.php ${INCS} mce_ifm.php
 
 DOCSD = docs
 JSDIR = js
-JSBIN = $(JSDIR)/editor_plugin.min.js $(JSDIR)/editor_plugin3x.min.js $(JSDIR)/formxed.min.js $(JSDIR)/screens.min.js $(H5DIR)/front.min.js
-JSSRC = $(JSDIR)/editor_plugin.js $(JSDIR)/editor_plugin3x.js $(JSDIR)/formxed.js $(JSDIR)/screens.js $(H5DIR)/front.js
+JSBIN = $(JSDIR)/editor_plugin.min.js $(JSDIR)/editor_plugin42.min.js $(JSDIR)/editor_plugin3x.min.js $(JSDIR)/formxed.min.js $(JSDIR)/screens.min.js $(H5DIR)/front.min.js
+JSSRC = $(JSDIR)/editor_plugin.js $(JSDIR)/editor_plugin42.js $(JSDIR)/editor_plugin3x.js $(JSDIR)/formxed.js $(JSDIR)/screens.js $(H5DIR)/front.js
 H5DIR = evhh5v
 H5BIN = $(H5DIR)/evhh5v.css $(H5DIR)/ctlbar.svg $(H5DIR)/ctlvol.svg $(H5DIR)/ctrbut.svg $(JSDIR)/front.min.js
 LCDIR = locale
@@ -51,7 +51,7 @@ SSRCS = $(SDIRI)/$(MINGS) $(SDIRI)/$(MINGA) $(SDIRI)/$(MINGC)
 SDEFS = default.mp4
 SBINS = $(SDIRI)/$(MNAME).swf
 
-ALSO = Makefile COPYING version.sh
+ALSO = Makefile COPYING version.sh .htaccess
 #READS= README README.tty README.tt8 README.pdf README.html
 READS= README README.pdf README.html
 ZALL = ${SRCS} ${ALSO} ${READS} ${SDEFS} readme.txt
