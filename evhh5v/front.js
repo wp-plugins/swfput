@@ -141,7 +141,7 @@ function evhh5v_controlbar_elements(parms, fixups) {
 
 	barobj.style.width = "" + ip["width"] + "px";
 	barobj.style.height = "" + ip["barheight"] + "px";
-	barobj.setAttribute("onload", "evhh5v_ctlbarload(this, '"+pdiv+"'); false;");
+	barobj.setAttribute("onload", "evhh5v_ctlbarload(this, '"+pdiv+"'); return false;");
 	barobj.setAttribute('type', "image/svg+xml");
 	barobj.setAttribute("data", url + (evhh5v_need_svg_query() ? "" : q));
 
@@ -187,7 +187,7 @@ function evhh5v_controlbar_elements(parms, fixups) {
 	p.setAttribute('value', "1st");
 	barobj.appendChild(p);
 
-	barobj.setAttribute("onload", "evhh5v_ctlbutload(this, '"+pdiv+"'); false;");
+	barobj.setAttribute("onload", "evhh5v_ctlbutload(this, '"+pdiv+"'); return false;");
 	barobj.setAttribute('type', "image/svg+xml");
 	barobj.setAttribute("data", url + (evhh5v_need_svg_query() ? "" : q));
 
@@ -226,7 +226,7 @@ function evhh5v_controlbar_elements(parms, fixups) {
 	p.setAttribute('value', "vol");
 	barobj.appendChild(p);
 
-	barobj.setAttribute("onload", "evhh5v_ctlvolload(this, '"+pdiv+"'); false;");
+	barobj.setAttribute("onload", "evhh5v_ctlvolload(this, '"+pdiv+"'); return false;");
 	barobj.setAttribute('type', "image/svg+xml");
 	barobj.setAttribute("data", url + (evhh5v_need_svg_query() ? "" : q));
 
@@ -3199,30 +3199,39 @@ evhh5v_controller.prototype = {
 			this._cnv.width = sw; this._cnv.height = sh;
 		}
 	},
-	// put a frame on the canvas . . .
-	// There are two versions of frame timer procs -- unless I
-	// decide on one and delete the other. Of course, one set must
-	// be commented at any time. One uses setInterval(), the other
-	// uses recursive setTimeout() -- so far performance diffs
-	// are infinitesimal, ephemeral, and very likely imaginary.
-	/*
-	*/
+
+	// start putting frames on the canvas at a regular interval
 	put_canvas_frame : function() {
 		if ( ! this.is_canvas || this.frame_timer || this._vid.paused || this._vid.ended ) {
 			return;
 		}
-
+		
 		var that = this;
 		this.frame_timer = setInterval(function () {
-			that._ctx.drawImage(that._vid, that._x, that._y, that._width, that._height);
+			that._ctx.drawImage(that._vid, that._x, that._y,
+			    that._width  || that.width,
+			    that._height || that.height);
 		}, this.canvas_frame_timeout);
 	},
+
+	// stop putting frames on the canvas at a regular interval
 	end_canvas_frame : function() {
 		if ( ! this.frame_timer ) return;
 		clearInterval(this.frame_timer);
 		this.frame_timer = false;
 	},
-	canvas_frame_timeout : 16,
+
+	// interval for putting frames on the canvas at:
+	// 30   fps is value 33.333...
+	// 33   fps is value 30.3030...
+	// 48   fps is value 20.8333...
+	// 60   fps is value 16.666...
+	// 62.5 fps is value 16
+	// . . . etc..
+	// but these will not likely be delivered on time;
+	// to tune for at least 30 fps, try something higher
+	canvas_frame_timeout : 21,
+
 	// put a *single* frame on the canvas, e.g. when trying to get
 	// poster to appear
 	put_canvas_frame_single : function() {
@@ -3231,23 +3240,26 @@ evhh5v_controller.prototype = {
 			ctx.drawImage(this._vid, this._x, this._y, this._width, this._height);
 		}
 	},
+
+	// put a *single* frame on the canvas, e.g. when trying to get
+	// poster to appear -- after some time in ms.
 	put_canvas_frame_single_timeout : function(timeout) {
 		var that = this;
 		this.canvas_frame_single_timer = setTimeout(function () {
 			that.put_canvas_frame_single();
-		}, timeout == undefined ? 50 : timeout);
+		}, timeout || 50);
 	},
-	setpad : function(pad) {
-		this.pad = pad;
-	},
-	// get the control bar svg height
+
+	// getter: get the control bar svg height
 	get barheight() {
 		return parseInt(this.ctlbar["barheight"]);
 	},
-	// get the object in place as video
+
+	// getter: get the object in place as video
 	get v() {
 		return this.is_canvas ? this._cnv : this._vid;
 	},
+
 	// [gs]etters for width and height, allowing interface resize code
 	// to simply read and assign as it would with a browser object;
 	// note the additional objects handled on size assignment: the
@@ -3259,6 +3271,8 @@ evhh5v_controller.prototype = {
 		if ( this.in_fullscreen ) return; // special case refusal
 		this.put_width(v);
 	},
+
+	// in service of setter width(v), and callable by name
 	put_width : function(v) {
 		this.hide_volctl();
 		this.set_width = v;
@@ -3279,11 +3293,14 @@ evhh5v_controller.prototype = {
 		t.style.width = v + "px";
 		t.style.left = this.pad + "px";
 	},
+
 	get height() { return this.set_height == undefined ? this.v.height : this.set_height; },
 	set height(v) {
 		if ( this.in_fullscreen ) return; // special case refusal
 		this.put_height(v);
 	},
+
+	// in service of setter height(v), and callable by name
 	put_height : function(v) {
 		this.hide_volctl();
 		var t;
@@ -3306,7 +3323,9 @@ evhh5v_controller.prototype = {
 		t.style.top = this.bar_y + "px";
 		t.style.left = this.pad + "px";
 	},
-	// these are for the resizing JS that handles this; no effect
+
+	// these are for the resizing code that handles this; emulating
+	// properties of some native DOM objects
 	get pixelWidth() { if ( this.v.pixelWidth !== undefined ) return this.v.pixelWidth; return undefined; },
 	set pixelWidth(v) { this.v.pixelWidth = v; },
 	get pixelHeight() { if ( this.v.pixelHeight !== undefined ) return this.v.pixelHeight; return undefined; },
@@ -3321,21 +3340,15 @@ evhh5v_controller.prototype = {
 		this.put_width(w);
 	},
 
-	// event dispatcher -- we can ensure that this === this this,
-	// and the call sequence
+	// event dispatcher -- if controller is ready
 	callbk : function(evt) {
 		var that;
 		if ( (that = this.evhh5v_controller) == undefined ) {
 			return;
 		}
+
 		var ename = evt.type;
 		var map = that.handlermap;
-
-		/* debugging
-			if ( that.evcnt === undefined ) that.evcnt = {};
-			if ( that.evcnt[ename] === undefined ) that.evcnt[ename] = 0;
-			that.evcnt[ename]++;
-		*/
 
 		if ( map[ename] != undefined ) {
 			for ( var i = 0, mx = map[ename].length; i < mx; i++ ) {
@@ -3346,6 +3359,7 @@ evhh5v_controller.prototype = {
 			}
 		}
 	},
+
 	// event handler installer -- installs from current handlermap
 	// on obj arg; e.g., if stop() replaces video object
 	_obj_add_evt : function(obj, bubool) {
@@ -3388,7 +3402,8 @@ evhh5v_controller.prototype = {
 			}
 		}
 	},
-	// events
+
+	// install events handlers
 	install_handlers : function(newvid) {
 		// NOTE: it is arranged that this in handler will be this this
 		var newv = false;
@@ -3445,6 +3460,7 @@ evhh5v_controller.prototype = {
 			this.hide_wait();
 			//evhh5v_msg("WAIT SPINNER STOP: " + e.type);
 		}, false);
+
 		this.addEventListener(["ended"], function(e) {
 			if  ( this.evcnt !== undefined ) {
 				for ( var k in this.evcnt ) {
@@ -3919,8 +3935,7 @@ evhh5v_controller.prototype = {
 		}
 	},
 	set_bar_y : function(y) {
-		var t = document.getElementById(this.ctlbar["ctlbardiv"]);
-		t.style.top = y + "px";
+		this.bardiv.style.top = y + "px";
 	},
 
 	// callback for play progress bar click -- delivered from
@@ -3951,7 +3966,6 @@ evhh5v_controller.prototype = {
 		this.bar.progress_pl(t / d);
 		if ( ! this.playing ) {
 			this.put_canvas_frame_single_timeout();
-			//this.put_canvas_frame_single();
 		}
 	},
 

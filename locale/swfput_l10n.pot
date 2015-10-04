@@ -1,4 +1,4 @@
-# swfput 3.0.4 Pot Source
+# swfput 3.0.5 Pot Source
 # Copyright (C) 2013 Ed Hynan
 # This file is distributed under the same license as the swfput package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: swfput 3.0.4\n"
+"Project-Id-Version: swfput 3.0.5\n"
 "Report-Msgid-Bugs-To: edhynan@gmail.com\n"
-"POT-Creation-Date: 2015-09-07 19:14-0400\n"
+"POT-Creation-Date: 2015-10-04 13:45-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -470,11 +470,11 @@ msgstr ""
 msgid " [A/V content \"%s\" disabled] "
 msgstr ""
 
-#: swfput.php:3017
+#: swfput.php:3047
 msgid "Video playback is not available"
 msgstr ""
 
-#: swfput.php:3178
+#: swfput.php:3208
 msgid "Video playback is not available."
 msgstr ""
 
